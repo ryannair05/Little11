@@ -439,7 +439,7 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
             else %init(bottominsetfix);
         }
 
-        if (wants11Camera) {
+        if([bundleIdentifier isEqualToString:@"com.apple.camera"] && wants11Camera)  {
             cameraPrefs();
             %init(iPhone11Cam);
         }
