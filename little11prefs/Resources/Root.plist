@@ -50,7 +50,7 @@
 			<key>key</key>
 			<string>homeBarSB</string>
 			<key>label</key>
-			<string>Home Bar (System-wide)</string>
+			<string>Home Bar in Applications</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
@@ -64,7 +64,7 @@
 			<key>key</key>
 			<string>homeBarLS</string>
 			<key>label</key>
-			<string>Home Bar (LockScreen)</string>
+			<string>Home Bar in CoverSheet</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
@@ -272,7 +272,7 @@
 			<key>key</key>
 			<string>ProudLock</string>
 			<key>label</key>
-			<string>FaceID Animations</string>
+			<string>FaceID Animations [BETA]</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
@@ -287,6 +287,20 @@
 			<string>lsShortcutsEnabled</string>
 			<key>label</key>
 			<string>LockScreen Shortcuts</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>11Camera</string>
+			<key>label</key>
+			<string>iPhone 11 Camera UI [BETA]</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>

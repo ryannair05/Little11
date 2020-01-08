@@ -1,10 +1,13 @@
+#import <UIKit/UIKit.h>
+#include <sys/utsname.h>
 #define CGRectSetY(rect, y) CGRectMake(rect.origin.x, y, rect.size.width, rect.size.height)
 
 // Declaring our Variables that will be used throughout the program
-static NSInteger statusBarStyle, screenRoundness, appswitcherRoundness, bottomInsetVersion;
-static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSwitcher, wantsReduceRows, wantsCCGrabber, wantsRoundedCorners, wantsPIP, wantsProudLock, wantsHideSBCC,wantsLSShortcuts, wantsBatteryPercent;
+NSInteger statusBarStyle, screenRoundness, appswitcherRoundness, bottomInsetVersion;
+BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSwitcher, wantsReduceRows, wantsCCGrabber, wantsRoundedCorners, wantsPIP, wantsProudLock, wantsHideSBCC,wantsLSShortcuts, wantsBatteryPercent, wants11Camera;
 
-// Telling the iPhone that we want the fluid gestures
+// Telling the iPhone that we want the fluid gestures 
+
 %hook BSPlatform
 - (NSInteger)homeButtonType {
 	return 2;
@@ -17,31 +20,40 @@ static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSw
 @property (retain, nonatomic) UIImageView * controlCenterGlyphView; 
 @end
 
-%hook CSQuickActionsView // Enables/Disables the lockscreen shortcuts 
-- (BOOL)_prototypingAllowsButtons {
-	return wantsLSShortcuts;
+// Forces the default keyboard when the iPhone X keyboard is disabled and the new bottom inset is enabled.
+%group ForceDefaultKeyboard
+%hook UIKeyboardImpl
++(UIEdgeInsets)deviceSpecificPaddingForInterfaceOrientation:(NSInteger)orientation inputMode:(id)mode {
+    UIEdgeInsets orig = %orig;
+    orig.bottom = 0;
+    return orig;
 }
 %end
+%end
 
-// Fixes the toggles on the coversheet
+// Enables & Fixes the toggles on the lockscreen.
+@interface UICoverSheetButton : UIControl
+@end
+
+@interface SBFTouchPassThroughView : UIView
+@property (nonatomic, retain) UICoverSheetButton *flashlightButton;
+@property (nonatomic, retain) UICoverSheetButton *cameraButton;
+@end
 
 @interface CSQuickActionsView : UIView
-- (void)_layoutQuickActionButtons;
+- (UIEdgeInsets)_buttonOutsets;
 @end
 
 %hook CSQuickActionsView
+- (BOOL)_prototypingAllowsButtons {
+	return wantsLSShortcuts;
+}
 - (void)_layoutQuickActionButtons {
-	%orig;
-	for (UIView *subview in self.subviews) {
-		if (subview.frame.origin.x < 50) {
-			subview.frame = CGRectMake(46, subview.frame.origin.y - 90, 50, 50);
-		} else {
-			CGFloat _screenWidth = [UIScreen mainScreen].bounds.size.width;
-			subview.frame = CGRectMake(_screenWidth - 96, subview.frame.origin.y - 90, 50, 50);
-		}
-        #pragma clang diagnostic ignored "-Wunused-value"
-        [subview init];
-	}
+    CGRect screenBounds = [UIScreen mainScreen].bounds;
+    UIEdgeInsets insets = [self _buttonOutsets];
+
+    ((SBFTouchPassThroughView *)self).flashlightButton.frame = CGRectMake(46, screenBounds.size.height - 90 - insets.top, 50, 50);
+	((SBFTouchPassThroughView *)self).cameraButton.frame = CGRectMake(screenBounds.size.width - 96, screenBounds.size.height - 90 - insets.top, 50, 50);
 }
 %end
 
@@ -60,6 +72,14 @@ static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSw
 %end
 %end
 
+%group batteryPercent
+%hook _UIBatteryView 
+-(void)setShowsPercentage:(BOOL)arg1 {
+    return %orig(YES);
+}
+%end 
+%end
+
 // Reduce reachability sensitivity.
 %hook SBReachabilitySettings
 - (void)setSystemWideSwipeDownHeight:(double) systemWideSwipeDownHeight {
@@ -69,7 +89,6 @@ static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSw
 
 // All the hooks for the iPhone X statusbar.
 %group StatusBarX
-// Fix control center, it dosen't crash anymore on iOS 13 like it does on iOS 12 but this is still wanted
 %hook _UIStatusBarVisualProvider_iOS
 + (Class)class {
     return NSClassFromString(@"_UIStatusBarVisualProvider_Split58");
@@ -79,13 +98,9 @@ static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSw
 
 // All the hooks for the iPad statusbar.
 %group StatusBariPad
-
-@interface CCUIHeaderPocketView : UIView				
-@end
-
 %hook _UIStatusBarVisualProvider_iOS
 + (Class)class {
-    if(screenRoundness >= 16) return NSClassFromString(@"_UIStatusBarVisualProvider_RoundedPad_ForcedCellular");
+    if(screenRoundness > 15) return NSClassFromString(@"_UIStatusBarVisualProvider_RoundedPad_ForcedCellular");
     return NSClassFromString(@"_UIStatusBarVisualProvider_Pad_ForcedCellular");
 }
 %end
@@ -93,15 +108,21 @@ static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSw
 // Fixes status bar glitch after closing control center
 %hook CCUIHeaderPocketView
 - (void)setFrame:(CGRect)frame {
-    if(screenRoundness >= 16) %orig(CGRectSetY(frame, -20));
+    if(screenRoundness > 15) %orig(CGRectSetY(frame, -20));
     else %orig(CGRectSetY(frame, -24));
 }
 %end
 %end
 
-// Hide the homebar on the coversheet
-%group hideHomeBarLS
+// Hide the homebar 
+%hook SBFHomeGrabberSettings
+- (BOOL)isEnabled {
+    return wantsHomeBarSB;
+} 
+%end
 
+// Hide the homebar on the lockscreen
+%group hideHomeBarLS
 %hook CSTeachableMomentsContainerView
 -(void)setHomeAffordanceContainerView:(UIView *)arg1{
     return;
@@ -111,7 +132,6 @@ static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSw
 
 // iPhone X keyboard.
 %group KeyboardDock
-
 // Automatically adjusts the sized depending if Barmoji is installed or not.
 %hook UIKeyboardImpl
 +(UIEdgeInsets)deviceSpecificPaddingForInterfaceOrientation:(NSInteger)orientation inputMode:(id)mode {
@@ -131,7 +151,7 @@ static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSw
 %end
 %end
 
-// Enables the floating dock + rounds the cards of the app switcher.
+// Enables the rounded dock of the iPhone X + rounds up the cards of the app switcher.
 %group roundedDock
 
 %hook UITraitCollection
@@ -145,6 +165,7 @@ static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSw
 %group reduceRows
 %hook SBIconListView
 -(unsigned long long)iconRowsForCurrentOrientation{
+    if (%orig<4) return %orig;
 	return %orig-wantsReduceRows;
 }
 %end
@@ -169,8 +190,6 @@ static BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSw
 %end
 %end
 
-int applicationDidFinishLaunching;
-
 // Allows you to use the non-X iPhone button combinations.
 %group originalButtons
 %hook SBLockHardwareButtonActions
@@ -179,27 +198,12 @@ int applicationDidFinishLaunching;
 }
 %end
 
-%hook SBHomeHardwareButtonActions
-- (id)initWitHomeButtonType:(long long)arg1 {
-    return %orig(1);
-}
-%end
-
-%hook SpringBoard
--(void)applicationDidFinishLaunching:(id)application {
-    applicationDidFinishLaunching = 2;
-    %orig;
-}
-%end
-
 %hook SBPressGestureRecognizer
 - (void)setAllowedPressTypes:(NSArray *)arg1 {
     NSArray * lockHome = @[@104, @101];
     NSArray * lockVol = @[@104, @102, @103];
-    if ([arg1 isEqual:lockVol] && applicationDidFinishLaunching == 2) {
-        %orig(lockHome);
-        applicationDidFinishLaunching--;
-        return;
+    if ([arg1 isEqual:lockVol]) {
+        return %orig(lockHome);
     }
     %orig;
 }
@@ -207,17 +211,22 @@ int applicationDidFinishLaunching;
 
 %hook SBClickGestureRecognizer
 - (void)addShortcutWithPressTypes:(id)arg1 {
-    if (applicationDidFinishLaunching == 1) {
-        applicationDidFinishLaunching--;
-        return;
-    }
-    %orig;
+    return;
 }
 %end
 
 %hook SBHomeHardwareButton
+- (id)initWithScreenshotGestureRecognizer:(id)arg1 homeButtonType:(long long)arg2 buttonActions:(id)arg3 gestureRecognizerConfiguration:(id)arg4 {
+    return %orig(arg1,1,arg3,arg4);
+}
 - (id)initWithScreenshotGestureRecognizer:(id)arg1 homeButtonType:(long long)arg2 {
     return %orig(arg1,1);
+}
+%end
+
+%hook SBVolumeHardwareButton
+- (id)initWithScreenshotGestureRecognizer:(id)arg1 shutdownGestureRecognizer:(id)arg2 homeButtonType:(long long)arg3 {
+    return %orig(arg1,arg2,1);
 }
 %end
 %end
@@ -239,48 +248,19 @@ int applicationDidFinishLaunching;
 %end
 %end 
 
-// Adds the new bottom inset to the screen.
+// Adds the bottom inset to the screen.
 %group InsetX	
 
-extern "C" CFPropertyListRef MGCopyAnswer(CFStringRef);
-
-typedef unsigned long long addr_t;
-
-static addr_t step64(const uint8_t *buf, addr_t start, size_t length, uint32_t what, uint32_t mask) {
-	addr_t end = start + length;
-	while (start < end) {
-		uint32_t x = *(uint32_t *)(buf + start);
-		if ((x & mask) == what) {
-			return start;
-		}
-		start += 4;
-	}
-	return 0;
-}
-
-static addr_t find_branch64(const uint8_t *buf, addr_t start, size_t length) {
-	return step64(buf, start, length, 0x14000000, 0xFC000000);
-}
-
-static addr_t follow_branch64(const uint8_t *buf, addr_t branch) {
-	long long w;
-	w = *(uint32_t *)(buf + branch) & 0x3FFFFFF;
-	w <<= 64 - 26;
-	w >>= 64 - 26 - 2;
-	return branch + w;
-}
-
-static CFPropertyListRef (*orig_MGCopyAnswer_internal)(CFStringRef property, uint32_t *outTypeCode);
-CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property, uint32_t *outTypeCode) {
-    CFPropertyListRef r = orig_MGCopyAnswer_internal(property, outTypeCode);
+CFPropertyListRef (*orig_MGCopyAnswer_internal)();
+CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
+    CFPropertyListRef r = orig_MGCopyAnswer_internal();
 	#define k(string) CFEqual(property, CFSTR(string))
     NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     if (k("oPeik/9e8lQWMszEjbPzng")) {
         CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(NULL, 0, (CFDictionaryRef)r);
         CFRelease(r);
-        CFNumberRef num;
         uint32_t deviceSubType = 0x984;
-        num = CFNumberCreate(NULL, kCFNumberIntType, &deviceSubType);
+        CFNumberRef num = CFNumberCreate(NULL, kCFNumberIntType, &deviceSubType);
         CFDictionarySetValue(copy, CFSTR("ArtworkDeviceSubType"), num);
         return copy;
     }  else if (k("8olRm6C1xqr7AJGpLRnpSw") && [bundleIdentifier isEqualToString:@"com.apple.springboard"]) {
@@ -290,7 +270,7 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property, uint32_t *outT
 }
 %end
 
-// Adds the old bottom inset to the screen.
+// Adds the bottom inset to the screen.
 %group bottomInset			
 %hook UIApplicationSceneSettings		
 - (UIEdgeInsets)safeAreaInsetsLandscapeLeft {		
@@ -312,65 +292,40 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property, uint32_t *outT
  %end
 
 // Enables PiP in video player.
-%group PIP
-extern "C" Boolean MGGetBoolAnswer(CFStringRef);
-%hookf(Boolean, MGGetBoolAnswer, CFStringRef key) {
+%group MobileGestalt
+%hookf(Boolean, "_MGGetBoolAnswer", CFStringRef key) {
 #define keyy(key_) CFEqual(key, CFSTR(key_))
     if (keyy("nVh/gwNpy7Jv1NOk00CMrw"))
         return wantsPIP;
+    else if (keyy("z5G/N9jcMdgPm8UegLwbKg")) 
+        return wantsProudLock;
     return %orig;
 }
 %end
 
 // Adds the padlock to the lockscreen.
 %group ProudLock
-
-extern "C" Boolean MGGetBoolAnswer(CFStringRef);
-%hookf(Boolean, MGGetBoolAnswer, CFStringRef key) {
-#define keyyy(key_) CFEqual(key, CFSTR(key_))
-    if (keyyy("z5G/N9jcMdgPm8UegLwbKg"))
-        return YES;
-    return %orig;
+%hook SBUIPasscodeBiometricResource
+-(BOOL)hasPearlSupport {
+    return YES;
 }
+-(BOOL)hasMesaSupport {
+    return NO;
+}
+%end
+%end
 
-CGFloat offset = 0;
-
-%hook SBFLockScreenDateViewController
-- (void)loadView {
-	if (%c(JPWeatherManager) != nil) {
-		%orig;
-		return;
-	}
-	CGFloat screenWidth = UIScreen.mainScreen.bounds.size.width;
-	if (screenWidth <= 320) {
-		offset = 20;
-	} else if (screenWidth <= 375) {
-		offset = 35;
-	} else if (screenWidth < 415) {
-		offset = 28;
-	}
-	%orig;
+%group iPhone11Cam
+%hook CAMCaptureCapabilities 
+-(BOOL)isCTMSupported {
+    return YES;
 }
 %end 
-
-%hook SBFLockScreenDateView
-- (void)setFrame:(CGRect)frame {
-    if(%c(JPWeatherManager) != nil) return;
-    %orig(CGRectSetY(frame, frame.origin.y + offset));
+%hook CAMViewfinderViewController 
+-(BOOL)_wantsHDRControlsVisible{
+    return NO;
 }
-%end
-
-%hook NCNotificationListCollectionView
-- (void)setFrame:(CGRect)frame {
-	%orig(CGRectSetY(frame, frame.origin.y + offset));
-}
-%end
-
-%hook SBDashBoardAdjunctListView
-- (void)setFrame:(CGRect)frame {
-	%orig(CGRectSetY(frame, frame.origin.y + offset));
-}
-%end
+%end 
 %end
 
 // Adds a bottom inset to the camera app.
@@ -388,20 +343,15 @@ CGFloat offset = 0;
 %end
 %end
 
-// Fix the iPhone X status bar in instagram.
+// Fix status bar in instagram.
+
 %group InstagramFix
 
-@interface IGNavigationBar : UIView
+@interface IGNavigationBar : UINavigationBar
 @end
 
-%hook UIStatusBar_Modern
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, -5));
-}
-%end
-
 %hook IGNavigationBar
-- (void)layoutSubviews {
+- (void)layoutSubviews {    
     %orig;
     CGRect _frame = self.frame;
     _frame.origin.y = 20;
@@ -410,74 +360,18 @@ CGFloat offset = 0;
 %end
 %end
 
-// Fix the iPhone X status bar in Google Maps.
-%group GMapsFix
-
-%hook UIStatusBar_Modern
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, -10));
-}
-%end
+%group TikTokFix
 %end
 
-// Fix the iPhone X status bar in YouTube.
-%group YTSBFix
-
-%hook UIStatusBar_Modern
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, -7));
-}
+// Fix status bar in YouTube.
+%group YTFix
 %end
 
-%hook YTHeaderView
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, frame.origin.y + 10));
-}
-%end
-%end
-
-// Fix bottom bar in YouTube.
-%group YTBBFix
-
-BOOL isClassInHierarchy(Class cls)
-{
-    __block __weak BOOL (^weak_recursiveSearch)(UIView*, Class);
-    BOOL (^recursiveSearch)(UIView*, Class);
-    weak_recursiveSearch = recursiveSearch = ^(UIView* v, Class c){
-        if ([v isKindOfClass:c])
-            return YES;
-        for (UIView* subV in v.subviews)
-        {
-            if (weak_recursiveSearch(subV, c))
-                return YES;
-        }
-        return NO;
-    };
-    for (UIWindow* w in [UIApplication sharedApplication].windows)
-    {
-        if (recursiveSearch(w, cls))
-            return YES;
-    }
-    return NO;
-}
-
-%hook YTPivotBarView
-- (void)setFrame:(CGRect)frame {
-    if(!isClassInHierarchy(%c(YTNGWatchCollectionView))) {
-        %orig(CGRectSetY(frame, frame.origin.y - 21));
-    }
-}
-%end
-
-%hook YTNGWatchLayerView
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, -21));
-}
-%end
-%end
+%group bottominsetfix
+%end 
 
 // Preferences.
-static void loadPrefs() {
+ void loadPrefs() {
 	NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
 	if (prefs) {
 		statusBarStyle = [[prefs objectForKey:@"statusBarStyle"] integerValue];
@@ -491,16 +385,16 @@ static void loadPrefs() {
         wantsReduceRows =  [[prefs objectForKey:@"reduceRows"] boolValue];
         wantsCCGrabber = [[prefs objectForKey:@"ccGrabber"] boolValue];
         wantsBatteryPercent = [[prefs objectForKey:@"batteryPercent"] boolValue];
-      //  wantsOriginalButtons =  [[prefs objectForKey:@"originalButtons"] boolValue];
         wantsRoundedCorners = [[prefs objectForKey:@"roundedCorners"] boolValue];
         wantsPIP = [[prefs objectForKey:@"PIP"] boolValue];
         wantsProudLock = [[prefs objectForKey:@"ProudLock"] boolValue];
         wantsHideSBCC = [[prefs objectForKey:@"HideSBCC"] boolValue];
         wantsLSShortcuts = [[prefs objectForKey:@"lsShortcutsEnabled"] boolValue];
+        wants11Camera = [[prefs objectForKey:@"11Camera"] boolValue];
 	}
 }
 
-static void initPrefs() {
+ void initPrefs() {
 	NSString *path = @"/User/Library/Preferences/com.ryannair05.little11prefs.plist";
 	NSString *pathDefault = @"/Library/PreferenceBundles/little11prefs.bundle/defaults.plist";
 	NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -509,56 +403,59 @@ static void initPrefs() {
 	}
 }
 
+ void cameraPrefs() {
+}
+
 %ctor {
     @autoreleasepool {
 	    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.ryannair05.little11prefs/prefsupdated"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 	    initPrefs();
 	    loadPrefs();
-        if(statusBarStyle == 1) %init(StatusBariPad) 
-	    else if(statusBarStyle == 2) {
-            %init(StatusBarX);
-            NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-            if([bundleIdentifier isEqualToString:@"com.burbn.instagram"]) %init(InstagramFix);
-            else if([bundleIdentifier isEqualToString:@"com.google.Maps"]) %init(GMapsFix);
-            else if([bundleIdentifier isEqualToString:@"com.google.ios.youtube"]) %init(YTSBFix);
+        NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+        if((statusBarStyle != 0 || bottomInsetVersion == 2) && ([bundleIdentifier isEqualToString:@"com.burbn.instagram"])) {
+            %init(InstagramFix);
         }
+        if(statusBarStyle == 1) %init(StatusBariPad)      
+	    else if(statusBarStyle == 2) %init(StatusBarX);
         else wantsHideSBCC = YES;
 	
 	    if(bottomInsetVersion == 2) {
             MSImageRef libGestalt = MSGetImageByName("/usr/lib/libMobileGestalt.dylib");
             if (libGestalt) {
                 void *MGCopyAnswerFn = MSFindSymbol(libGestalt, "_MGCopyAnswer");
-                const uint8_t *MGCopyAnswer_ptr = (const uint8_t *)MGCopyAnswer;
-                addr_t branch = find_branch64(MGCopyAnswer_ptr, 0, 8);
-                addr_t branch_offset = follow_branch64(MGCopyAnswer_ptr, branch);
-                MSHookFunction(((void *)((const uint8_t *)MGCopyAnswerFn + branch_offset)), (void *)new_MGCopyAnswer_internal, (void **)&orig_MGCopyAnswer_internal);
+                MSHookFunction((void *)((const uint8_t *)MGCopyAnswerFn + 8), (void *)new_MGCopyAnswer_internal, (void **)&orig_MGCopyAnswer_internal);
             }
             %init(InsetX);
         } else if(bottomInsetVersion == 1) %init(bottomInset);
         
-        if(!wantsHomeBarSB) %init(hideHomeBarSB);
         if(!wantsHomeBarLS) %init(hideHomeBarLS);
 
-        if(wantsHomeBarSB || bottomInsetVersion > 0) {
-            NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-            if([bundleIdentifier isEqualToString:@"com.apple.camera"]) %init(CameraFix);
-            else if([bundleIdentifier isEqualToString:@"com.google.ios.youtube"]) %init(YTBBFix);
+        if(bottomInsetVersion > 0 || statusBarStyle == 2) {
+            if([bundleIdentifier isEqualToString:@"com.zhiliaoapp.musically"]) %init(TikTokFix);
+            else if ([bundleIdentifier isEqualToString:@"com.google.ios.youtube"]) %init(YTFix);
+            if(bottomInsetVersion > 0) {
+                 if([bundleIdentifier isEqualToString:@"com.apple.camera"] && !wants11Camera) %init(CameraFix);
+            }
+            else %init(bottominsetfix);
         }
 
-        if(wantsKeyboardDock) %init(KeyboardDock);;
+        if (wants11Camera) {
+            cameraPrefs();
+            %init(iPhone11Cam);
+        }
+
+        if(wantsKeyboardDock) %init(KeyboardDock);
+        else %init(ForceDefaultKeyboard);
         
         if(wantsRoundedAppSwitcher) %init(roundedDock);
         %init(reduceRows);
         if(wantsCCGrabber) %init(ccGrabber);
-      //  if(wantsOriginalButtons) 
         %init(originalButtons);
-      //  else %init (xButtons);
         if(wantsRoundedCorners) %init(roundedCorners);
-        %init(PIP);
+        %init(MobileGestalt);
         if(wantsHideSBCC) %init(HideSBCC);
         if(wantsBatteryPercent) %init(batteryPercent);
         if(wantsProudLock) %init(ProudLock);
-        
         %init(_ungrouped);
     }
 }
