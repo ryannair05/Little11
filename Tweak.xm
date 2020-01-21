@@ -320,10 +320,10 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
 -(BOOL)isCTMSupported {
     return YES;
 }
-%hook CAMCaptureCapabilities 
 -(BOOL)devicesupportsCTM {
     return YES;
 }
+%end
 %hook CAMDynamicShutterControl 
 -(BOOL)_shouldShortPressOnTouchDown {
     return YES;
