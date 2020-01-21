@@ -320,6 +320,14 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
 -(BOOL)isCTMSupported {
     return YES;
 }
+%hook CAMCaptureCapabilities 
+-(BOOL)devicesupportsCTM {
+    return YES;
+}
+%hook CAMDynamicShutterControl 
+-(BOOL)_shouldShortPressOnTouchDown {
+    return YES;
+}
 %end 
 %hook CAMViewfinderViewController 
 -(BOOL)_wantsHDRControlsVisible{
@@ -332,13 +340,13 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
 %group CameraFix
 %hook CAMBottomBar 
 - (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, frame.origin.y -40));
+    %orig(CGRectSetY(frame, frame.origin.y 40));
 }
 %end
 
 %hook CAMZoomControl
 - (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, frame.origin.y -30));
+    %orig(CGRectSetY(frame, frame.origin.y 30));
 }
 %end
 %end
