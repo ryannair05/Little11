@@ -320,6 +320,8 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
 -(BOOL)isCTMSupported {
     return YES;
 }
+%end
+%hook CAMCaptureCapabilities
 -(BOOL)devicesupportsCTM {
     return YES;
 }
