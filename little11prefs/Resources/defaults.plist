@@ -14,6 +14,10 @@
 	<false/>
 	<key>homeBarSB</key>
 	<false/>
+	<key>noGesturesForKeyboard</key>
+	<false/>
+	<key>iPadDock</key>
+	<false/>
 	<key>keyboardDock</key>
 	<true/>
 	<key>roundedAppSwitcher</key>

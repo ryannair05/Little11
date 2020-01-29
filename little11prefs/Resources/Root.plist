@@ -9,8 +9,6 @@
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>Global Settings</string>
-			<key>footerText</key>
-			<string>These settings automatically apply to every app and springboard.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -205,6 +203,36 @@
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>Misc Settings</string>
+			<key>footerText</key>
+			<string>Settings apply system-wide and need a respring to take effect.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>noGesturesForKeyboard</string>
+			<key>label</key>
+			<string>No Gestures While Using Keyboard</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>iPadDock</string>
+			<key>label</key>
+			<string>iPad Dock</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -308,17 +336,15 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>Apply Changes</string>
-			<key>footerText</key>
-			<string>You must respring in order for the changes to take effect.</string>
+			<string>Developed By </string>
 		</dict>
 		<dict>
-			<key>action</key>
-			<string>respring:</string>
-			<key>cell</key>
-			<string>PSButtonCell</string>
+			<key>cellClass</key>
+			<string>L11TwitterCell</string>
 			<key>label</key>
-			<string>Respring</string>
+			<string>Ryan Nair</string>
+			<key>accountName</key>
+			<string>ryannair05</string>
 		</dict>
 	</array>
 	<key>title</key>

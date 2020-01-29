@@ -3,7 +3,7 @@ include $(THEOS)/makefiles/common.mk
 ARCHS = arm64
 
 BUNDLE_NAME = little11prefs
-little11prefs_FILES = L11RootListController.m
+little11prefs_FILES = L11PrefsListController.m
 little11prefs_INSTALL_PATH = /Library/PreferenceBundles
 little11prefs_PRIVATE_FRAMEWORKS = Preferences
 
