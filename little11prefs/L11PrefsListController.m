@@ -1,4 +1,4 @@
-#import "Preferences.h"
+#import "L11PrefsListController.h"
 
 @implementation L11PrefsListController
 @synthesize respringButton;

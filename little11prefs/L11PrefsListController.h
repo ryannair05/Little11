@@ -3,14 +3,10 @@
 #import <Preferences/PSTableCell.h>
 #include <spawn.h>
 
-@interface L11PrefsListController : PSListController {
-    UITableView * _table;
-}
-
+@interface L11PrefsListController : PSListController
 @property (nonatomic, retain) UIBarButtonItem *respringButton;
 @property (nonatomic, retain) UILabel *titleLabel;
 @property (nonatomic, retain) UIImageView *iconView;
-
 
 - (void)respring:(id)sender;
 

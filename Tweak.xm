@@ -100,12 +100,6 @@ BOOL disableGestures = NO, wantsGesturesDisabledWhenKeyboard, wantsCCGrabber, wa
     return  UIEdgeInsetsMake(x.top+10, x.left, x.bottom,x.right);
 }
 %end
-
-%hook TFNNavigationBarOverlayView  
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectMake(frame.origin.x,frame.origin.y,frame.size.width,frame.size.height + 6));
-}
-%end
 %end
 
 %group StatusBariPad
@@ -145,16 +139,10 @@ BOOL disableGestures = NO, wantsGesturesDisabledWhenKeyboard, wantsCCGrabber, wa
 	arg1 = 0;
 	%orig;
 }
-- (void)setMinWidth:(double)arg1 {
-	arg1 = 0;
-	%orig;
-}
 %end
-%end
+%end 
 
-// iPhone X keyboard.
 %group KeyboardDock
-
 %hook UIKeyboardImpl
 +(UIEdgeInsets)deviceSpecificPaddingForInterfaceOrientation:(NSInteger)orientation inputMode:(id)mode {
     UIEdgeInsets orig = %orig;
@@ -168,7 +156,6 @@ BOOL disableGestures = NO, wantsGesturesDisabledWhenKeyboard, wantsCCGrabber, wa
 }
 %end
 
-// Moves the emoji and dictation icon on the keyboard. Automatically adjust the location depending if Barmoji is installed or not.
 %hook UIKeyboardDockView
 - (CGRect)bounds {
     if (NSClassFromString(@"BarmojiCollectionView")) 
@@ -220,7 +207,7 @@ BOOL disableGestures = NO, wantsGesturesDisabledWhenKeyboard, wantsCCGrabber, wa
 %end
 %end
 
-// Allows you to use the non-X iPhone button combinations.
+// Allows you to use the non-X iPhone button combinations. - For some reason only works on some devices
 %group originalButtons
 %hook SBPressGestureRecognizer
 - (void)setAllowedPressTypes:(NSArray *)arg1 {
@@ -239,6 +226,12 @@ BOOL disableGestures = NO, wantsGesturesDisabledWhenKeyboard, wantsCCGrabber, wa
 }
 %end
 
+%hook SBLockHardwareButtonActions
+- (id)initWithHomeButtonType:(long long)arg1 proximitySensorManager:(id)arg2 {
+    return %orig(1, arg2);
+}
+%end
+
 %hook SBClickGestureRecognizer
 -(void)addShortcutWithPressTypes:(NSArray *)arg1  {
     return;
@@ -246,7 +239,6 @@ BOOL disableGestures = NO, wantsGesturesDisabledWhenKeyboard, wantsCCGrabber, wa
 %end
 %end
 
-// System-wide rounded screen corners.
 %group roundedCorners
 
 @interface _UIRootWindow : UIView
@@ -290,7 +282,6 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
 }
 %end 
 
-// Adds the bottom inset to the screen.
 %group bottomInset			
 %hook UIApplicationSceneSettings		
 - (UIEdgeInsets)safeAreaInsetsLandscapeLeft {		
@@ -311,7 +302,7 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
 %end		
 %end
 
-// Enables PiP in video player.
+
 %group MobileGestalt
 %hookf(Boolean, "_MGGetBoolAnswer", CFStringRef key) {
 #define keyy(key_) CFEqual(key, CFSTR(key_))
@@ -323,7 +314,6 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
 }
 %end
 
-// Adds the padlock to the lockscreen.
 %group ProudLock
 %hook SBUIPasscodeBiometricResource
 -(BOOL)hasPearlSupport {
@@ -373,10 +363,6 @@ CFPropertyListRef new_MGCopyAnswer_internal(CFStringRef property) {
 %end
 %end
 
-void setDisableGestures(bool pass) {
-    disableGestures = pass;
-}
-
 %hook SBFloatingDockController
 + (BOOL)isFloatingDockSupported {
 	return wantsiPadDock;
@@ -384,6 +370,7 @@ void setDisableGestures(bool pass) {
 %end
 
 %group InstagramFix
+
 @interface IGNavigationBar : UINavigationBar
 @end
 
@@ -423,35 +410,39 @@ void setDisableGestures(bool pass) {
 %end
 %end
 
-%group bottominsetfix
+%group bottominsetfix // AWE = TikTok, TFN = Twitter, YT = Youtube
 %hook AWETabBar
 - (void)setFrame:(CGRect)frame {
-        %orig(CGRectSetY(frame, frame.origin.y + 40));
+    %orig(CGRectSetY(frame, frame.origin.y + 40));
 }
 %end
 
 %hook AWEFeedTableView
 - (void)setFrame:(CGRect)frame {
-		frame = CGRectMake(frame.origin.x,frame.origin.y,frame.size.width,frame.size.height + 40);
-		%orig(frame);
+	%orig(CGRectMake(frame.origin.x,frame.origin.y,frame.size.width,frame.size.height + 40));
+}
+%end
+
+%hook TFNNavigationBarOverlayView  
+- (void)setFrame:(CGRect)frame {
+    %orig(CGRectMake(frame.origin.x,frame.origin.y,frame.size.width,frame.size.height + 6));
 }
 %end
 
 %hook YTPivotBarView
 - (void)setFrame:(CGRect)frame {
-        %orig(CGRectSetY(frame, frame.origin.y - 40));
+    %orig(CGRectSetY(frame, frame.origin.y - 40));
 }
 %end
 %hook YTAppView
 - (void)setFrame:(CGRect)frame {
-		frame = CGRectMake(frame.origin.x,frame.origin.y,frame.size.width,frame.size.height + 40);
-		%orig(frame);
+	%orig(CGRectMake(frame.origin.x,frame.origin.y,frame.size.width,frame.size.height + 40));
 }
 %end
 %hook YTNGWatchLayerView
 -(CGRect)miniBarFrame{
-        CGRect frame = %orig;
-		return (CGRectSetY(frame, frame.origin.y - 40));
+    CGRect frame = %orig;
+	return (CGRectSetY(frame, frame.origin.y - 40));
 }
 %end
 %end 
@@ -499,13 +490,12 @@ void loadPrefs() {
 }
 
 %ctor {
-
     @autoreleasepool {
 	    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.ryannair05.little11prefs/prefsupdated"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 	    loadPrefs();
         NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         
-        if((statusBarStyle != 0 || bottomInsetVersion == 2) && ([bundleIdentifier isEqualToString:@"com.burbn.instagram"])) {
+        if(statusBarStyle != 0 || bottomInsetVersion == 2) {
             %init(InstagramFix);
         }
 
@@ -526,9 +516,7 @@ void loadPrefs() {
         if(bottomInsetVersion > 0 || statusBarStyle == 2) {
             if([bundleIdentifier isEqualToString:@"com.zhiliaoapp.musically"]) %init(TikTokFix);
             else if ([bundleIdentifier isEqualToString:@"com.google.ios.youtube"]) %init(YTFix);
-            if(bottomInsetVersion == 0) {
-                 %init(bottominsetfix); 
-            }
+            if(bottomInsetVersion == 0) %init(bottominsetfix); 
         }
 
         if(wants11Camera) {
@@ -542,10 +530,10 @@ void loadPrefs() {
 
         if (wantsGesturesDisabledWhenKeyboard) {
             [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardDidShowNotification object:nil queue:nil usingBlock:^(NSNotification *n){
-                        setDisableGestures(true);
+                       disableGestures = true;
                     }];
             [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardWillHideNotification object:nil queue:nil usingBlock:^(NSNotification *n){
-                        setDisableGestures(false);
+                        disableGestures = false;
                     }];
 
             %init(disableGesturesWhenKeyboard);
