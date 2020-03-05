@@ -134,29 +134,29 @@
 		</dict>
 		<dict>
 			<key>cell</key>
-			<string>PSLinkListCell</string>
+			<string>PSSwitchCell</string>
 			<key>default</key>
-			<integer>0</integer>
+			<false/>
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
-			<string>bottomInsetVersion</string>
+			<string>xButtons</string>
+			<key>label</key>
+			<string>iPhone X Button Combo [BETA]</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+			<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>bottomInset</string>
 			<key>label</key>
 			<string>Bottom Inset</string>
-			<key>detail</key>
-			<string>PSListItemsController</string>
-			<key>validValues</key>
-			<array>
-				<integer>0</integer>
-				<integer>1</integer>
-				<integer>2</integer>
-			</array>
-			<key>validTitles</key>
-			<array>
-				<string>No bottom inset</string>
-				<string>Old bottom inset</string>
-				<string>New bottom inset</string>
-			</array>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>

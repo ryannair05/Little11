@@ -2,7 +2,7 @@ THEOS_DEVICE_IP = 192.168.1.168
 
 FINALPACKAGE=1
 
-export TARGET = iphone:11.2
+export TARGET = iphone:13.0
 export ADDITIONAL_CFLAGS = -DTHEOS_LEAN_AND_MEAN -fobjc-arc
 
 include $(THEOS)/makefiles/common.mk
