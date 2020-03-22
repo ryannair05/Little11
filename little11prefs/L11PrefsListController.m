@@ -60,8 +60,8 @@
 
 - (void)respring:(id)sender {
     pid_t pid;
-    const char* args[] = {"killall", "-9", "backboardd", NULL};
-    posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+    const char* args[] = {"sbreload", NULL};
+    posix_spawn(&pid, "/usr/bin/sbreload", NULL, NULL, (char* const*)args, NULL);
 }
 
 - (NSArray *)specifiers {

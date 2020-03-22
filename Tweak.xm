@@ -3,7 +3,7 @@
 #define CGRectSetY(rect, y) CGRectMake(rect.origin.x, y, rect.size.width, rect.size.height)
 
 NSInteger statusBarStyle, screenRoundness, appswitcherRoundness;
-BOOL wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSwitcher, wantsReduceRows, wantsRoundedCorners, wants11Camera, wantsXButtons, wantsbottomInset;
+BOOL enabled, wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSwitcher, wantsReduceRows, wantsRoundedCorners, wants11Camera, wantsXButtons, wantsbottomInset;
 BOOL disableGestures = NO, wantsGesturesDisabledWhenKeyboard, wantsCCGrabber, wantsPIP, wantsProudLock, wantsHideSBCC,wantsLSShortcuts, wantsBatteryPercent, wantsiPadDock;
 
 %hook BSPlatform
@@ -498,6 +498,7 @@ void loadPrefs() {
 
         NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
         if (prefs) {
+            enabled = [[prefs objectForKey:@"enabled"] boolValue];
             statusBarStyle = [[prefs objectForKey:@"statusBarStyle"] integerValue];
             screenRoundness = [[prefs objectForKey:@"screenRoundness"] integerValue];
             appswitcherRoundness = [[prefs objectForKey:@"appswitcherRoundness"] integerValue];
@@ -523,22 +524,27 @@ void loadPrefs() {
 }
 
 %ctor {
+
     @autoreleasepool {
+
 	    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.ryannair05.little11prefs/prefsupdated"), NULL, CFNotificationSuspensionBehaviorCoalesce);
         initPrefs();
 	    loadPrefs();
+
         NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
 
-        if(statusBarStyle == 1) %init(StatusBariPad)      
-	    else if(statusBarStyle == 2) %init(StatusBarX);
-        else wantsHideSBCC = YES;
-	     
-        if (!wantsHomeBarLS) {
-            %init(hideHomeBarLS);
-            if (!wantsHomeBarSB) %init(completelyRemoveHomeBar);
-        }
+        if (enabled) {
 
-        if ((![bundleIdentifier isEqualToString:@"com.apple.springboard"]) && (wantsbottomInset || statusBarStyle == 2)) {
+            if(statusBarStyle == 1) %init(StatusBariPad)      
+	        else if(statusBarStyle == 2) %init(StatusBarX);
+            else wantsHideSBCC = YES;
+	     
+            if (!wantsHomeBarLS) {
+                %init(hideHomeBarLS);
+                if (!wantsHomeBarSB) %init(completelyRemoveHomeBar);
+            }
+
+            if ((![bundleIdentifier isEqualToString:@"com.apple.springboard"]) && (wantsbottomInset || statusBarStyle == 2)) {
 
             if(([bundleIdentifier isEqualToString:@"com.facebook.Facebook"])) 
                  wantsbottomInset = YES;
@@ -548,38 +554,43 @@ void loadPrefs() {
             
             if (!wantsbottomInset) 
                 %init(bottominsetfix)  
-            else 
+                else 
                 %init(CameraFix);
-        } 
+            } 
 
-        if(wants11Camera && ([bundleIdentifier isEqualToString:@"com.apple.camera"])) {
+            if(wants11Camera && ([bundleIdentifier isEqualToString:@"com.apple.camera"])) {
                 %init(iPhone11Cam);
-        }
+            }
 
-        if(wantsKeyboardDock) %init(KeyboardDock);
-        else %init(ForceDefaultKeyboard);
+            if(wantsKeyboardDock) %init(KeyboardDock);
+            else %init(ForceDefaultKeyboard);
 
-        if(wantsGesturesDisabledWhenKeyboard) {
-            [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardDidShowNotification object:nil queue:nil usingBlock:^(NSNotification *n){
+            if(wantsGesturesDisabledWhenKeyboard) {
+                [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardDidShowNotification object:nil queue:nil usingBlock:^(NSNotification *n){
                        disableGestures = true;
                     }];
-            [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardWillHideNotification object:nil queue:nil usingBlock:^(NSNotification *n){
+                [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardWillHideNotification object:nil queue:nil usingBlock:^(NSNotification *n){
                         disableGestures = false;
                     }];
 
-            %init(disableGesturesWhenKeyboard);
-        }
+                %init(disableGesturesWhenKeyboard);
+            }
         
-        if(wantsRoundedAppSwitcher) %init(roundedDock);
-        %init(reduceRows);
-        if(wantsCCGrabber) %init(ccGrabber);
-        if(!wantsXButtons) %init(originalButtons);
-        if(wantsRoundedCorners) %init(roundedCorners);
-        if(wantsHideSBCC) %init(HideSBCC);
-        if(wantsBatteryPercent) %init(batteryPercent);
-        if(wantsiPadDock) %init(iPadDock);
-        if(wantsProudLock) %init(ProudLock);
+            if(wantsRoundedAppSwitcher) %init(roundedDock);
+            %init(reduceRows);
+            if(wantsCCGrabber) %init(ccGrabber);
+            if(!wantsXButtons) %init(originalButtons);
+            if(wantsRoundedCorners) %init(roundedCorners);
+            if(wantsHideSBCC) %init(HideSBCC);
+            if(wantsBatteryPercent) %init(batteryPercent);
+            if(wantsiPadDock) %init(iPadDock);
+            if(wantsProudLock) %init(ProudLock);
 
-        %init;
+            %init;
+
+        }
+
+        return;
+        
     }
 }

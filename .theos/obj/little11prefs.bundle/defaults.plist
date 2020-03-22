@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>statusBarStyle</key>
+	<integer>2</integer>
+	<key>screenRoundness</key>
+	<integer>19</integer>
+	<key>appswitcherRoundness</key>
+	<integer>19</integer>
+	<key>bottomInsetVersion</key>
+	<integer>0</integer>
+	<key>homeBarLS</key>
+	<false/>
+	<key>homeBarSB</key>
+	<false/>
+	<key>noGesturesForKeyboard</key>
+	<false/>
+	<key>iPadDock</key>
+	<false/>
+	<key>keyboardDock</key>
+	<true/>
+	<key>roundedAppSwitcher</key>
+	<true/>
+	<key>reduceRows</key>
+	<false/>
+	<key>ccGrabber</key>
+	<false/>
+	<key>batteryPercent</key>
+	<false/>
+	<key>HideSBCC</key>
+	<false/>
+	<key>PIP</key>
+	<true/>
+	<key>ProudLock</key>
+	<false/>
+	<key>xButtons</key>
+	<false/>
+	<key>roundedCorners</key>
+	<false/>
+	<key>lsShortcutsEnabled</key>
+	<true/>
+	<key>11Camera</key>
+	<false/>
+</dict>
+</plist>
