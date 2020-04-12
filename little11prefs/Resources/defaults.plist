@@ -10,13 +10,21 @@
 	<integer>19</integer>
 	<key>bottomInsetVersion</key>
 	<integer>0</integer>
+	<key>enabled</key>
+	<true/>
 	<key>homeBarLS</key>
 	<false/>
+	<key>deviceSpoofing</key>
+	<false/>
+	<key>compatabilityMode</key>
+	<true/>
 	<key>homeBarSB</key>
 	<false/>
 	<key>noGesturesForKeyboard</key>
 	<false/>
 	<key>iPadDock</key>
+	<false/>
+	<key>iPadMultitasking</key>
 	<false/>
 	<key>keyboardDock</key>
 	<true/>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>App Settings</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>keyboardDock</string>
+			<key>label</key>
+			<string>Larger Keyboard</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+			<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>bottomInset</string>
+			<key>label</key>
+			<string>Bottom Inset</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Misc Settings</string>
+			<key>footerText</key>
+			<string>Compatabiity mode improves the layout of some apps while making it worse for others. Settings apply for this app and need a respring to take effect.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>compatabilityMode</string>
+			<key>label</key>
+			<string>Compatabiity Mode</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>deviceSpoofing</string>
+			<key>label</key>
+			<string>Device Spoofing</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Developed By </string>
+		</dict>
+		<dict>
+			<key>cellClass</key>
+			<string>L11TwitterCell</string>
+			<key>label</key>
+			<string>Ryan Nair</string>
+			<key>accountName</key>
+			<string>ryannair05</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>Little11</string>
+</dict>
+</plist>

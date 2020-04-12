@@ -8,6 +8,28 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
+			<string>Enable/Disable</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>enabled</string>
+			<key>label</key>
+			<string>Enable Tweak</string>
+			<key>id</key>
+			<string>enabled</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
 			<string>Global Settings</string>
 		</dict>
 		<dict>
@@ -18,6 +40,8 @@
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
+			<string>statusBarStyle</string>
+			<key>id</key>
 			<string>statusBarStyle</string>
 			<key>label</key>
 			<string>Status Bar Style</string>
@@ -47,6 +71,8 @@
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
 			<string>homeBarSB</string>
+			<key>id</key>
+			<string>homeBarSB</string>
 			<key>label</key>
 			<string>Home Bar in Applications</string>
 			<key>PostNotification</key>
@@ -60,6 +86,8 @@
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
+			<string>homeBarLS</string>
+			<key>id</key>
 			<string>homeBarLS</string>
 			<key>label</key>
 			<string>Home Bar in CoverSheet</string>
@@ -75,6 +103,8 @@
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
 			<string>keyboardDock</string>
+			<key>id</key>
+			<string>keyboardDock</string>
 			<key>label</key>
 			<string>Larger Keyboard</string>
 			<key>PostNotification</key>
@@ -88,6 +118,8 @@
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
+			<string>roundedAppSwitcher</string>
+			<key>id</key>
 			<string>roundedAppSwitcher</string>
 			<key>label</key>
 			<string>Rounded App Switcher + Dock</string>
@@ -115,6 +147,8 @@
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
 			<string>appswitcherRoundness</string>
+			<key>id</key>
+			<string>appswitcherRoundness</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
@@ -126,6 +160,8 @@
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
+			<string>reduceRows</string>
+			<key>id</key>
 			<string>reduceRows</string>
 			<key>label</key>
 			<string>Reduce Icon Rows by 1</string>
@@ -141,6 +177,8 @@
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
 			<string>xButtons</string>
+			<key>id</key>
+			<string>xButtons</string>
 			<key>label</key>
 			<string>iPhone X Button Combo [BETA]</string>
 			<key>PostNotification</key>
@@ -155,6 +193,8 @@
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
 			<string>bottomInset</string>
+			<key>id</key>
+			<string>bottomInset</string>
 			<key>label</key>
 			<string>Bottom Inset</string>
 			<key>PostNotification</key>
@@ -168,6 +208,8 @@
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
+			<string>roundedCorners</string>
+			<key>id</key>
 			<string>roundedCorners</string>
 			<key>label</key>
 			<string>Rounded Screen Corners</string>
@@ -195,6 +237,40 @@
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
 			<string>screenRoundness</string>
+			<key>id</key>
+			<string>screenRoundness</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>compatabilityMode</string>
+			<key>label</key>
+			<string>Compatabiity Mode</string>
+			<key>id</key>
+			<string>compatabilityMode</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>deviceSpoofing</string>
+			<key>label</key>
+			<string>Device Spoofing</string>
+			<key>id</key>
+			<string>deviceSpoofing</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
@@ -217,6 +293,8 @@
 			<string>noGesturesForKeyboard</string>
 			<key>label</key>
 			<string>No Gestures While Using Keyboard</string>
+			<key>id</key>
+			<string>noGesturesForKeyboard</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
@@ -231,6 +309,8 @@
 			<string>iPadDock</string>
 			<key>label</key>
 			<string>iPad Dock</string>
+			<key>id</key>
+			<string>iPadDock</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
@@ -242,6 +322,24 @@
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
+			<string>iPadMultitasking</string>
+			<key>id</key>
+			<string>iPadMultitasking</string>
+			<key>label</key>
+			<string>iPad Multitasking [Beta] </string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>ccGrabber</string>
+			<key>id</key>
 			<string>ccGrabber</string>
 			<key>label</key>
 			<string>CC Grabber</string>
@@ -257,6 +355,8 @@
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
 			<string>batteryPercent</string>
+			<key>id</key>
+			<string>batteryPercent</string>
 			<key>label</key>
 			<string>Battery Percentage in Statusbar</string>
 			<key>PostNotification</key>
@@ -270,6 +370,8 @@
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
+			<string>HideSBCC</string>
+			<key>id</key>
 			<string>HideSBCC</string>
 			<key>label</key>
 			<string>Hide Status Bar in Control Center</string>
@@ -285,6 +387,8 @@
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
 			<string>PIP</string>
+			<key>id</key>
+			<string>PIP</string>
 			<key>label</key>
 			<string>Picture In Picture</string>
 			<key>PostNotification</key>
@@ -298,6 +402,8 @@
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
+			<string>ProudLock</string>
+			<key>id</key>
 			<string>ProudLock</string>
 			<key>label</key>
 			<string>FaceID Animations [BETA]</string>
@@ -313,6 +419,8 @@
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
 			<string>lsShortcutsEnabled</string>
+			<key>id</key>
+			<string>lsShortcutsEnabled</string>
 			<key>label</key>
 			<string>LockScreen Shortcuts</string>
 			<key>PostNotification</key>
@@ -326,6 +434,8 @@
 			<key>defaults</key>
 			<string>com.ryannair05.little11prefs</string>
 			<key>key</key>
+			<string>11Camera</string>
+			<key>id</key>
 			<string>11Camera</string>
 			<key>label</key>
 			<string>iPhone 11 Camera UI [BETA]</string>
