@@ -23,28 +23,6 @@
 
 #import "OrderedDictionary.h"
 
-NSString *DescriptionForObject(NSObject *object, id locale, NSUInteger indent)
-{
-	NSString *objectString;
-	if ([object isKindOfClass:[NSString class]])
-	{
-		objectString = (NSString *)object;
-	}
-	else if ([object respondsToSelector:@selector(descriptionWithLocale:indent:)])
-	{
-		objectString = [(NSDictionary *)object descriptionWithLocale:locale indent:indent];
-	}
-	else if ([object respondsToSelector:@selector(descriptionWithLocale:)])
-	{
-		objectString = [(NSSet *)object descriptionWithLocale:locale];
-	}
-	else
-	{
-		objectString = [object description];
-	}
-	return objectString;
-}
-
 @implementation OrderedDictionary
 
 - (id)init
@@ -62,12 +40,6 @@ NSString *DescriptionForObject(NSObject *object, id locale, NSUInteger indent)
 	}
 	return self;
 }
-
-- (id)copy
-{
-	return [self mutableCopy];
-}
-
 - (void)setObject:(id)anObject forKey:(id)aKey
 {
 	if (![dictionary objectForKey:aKey])
@@ -87,7 +59,6 @@ NSString *DescriptionForObject(NSObject *object, id locale, NSUInteger indent)
 {
 	return [dictionary count];
 }
-
 - (id)objectForKey:(id)aKey
 {
 	return [dictionary objectForKey:aKey];
@@ -96,11 +67,6 @@ NSString *DescriptionForObject(NSObject *object, id locale, NSUInteger indent)
 - (NSEnumerator *)keyEnumerator
 {
 	return [array objectEnumerator];
-}
-
-- (NSEnumerator *)reverseKeyEnumerator
-{
-	return [array reverseObjectEnumerator];
 }
 
 - (void)insertObject:(id)anObject forKey:(id)aKey atIndex:(NSUInteger)anIndex

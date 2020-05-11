@@ -2,14 +2,6 @@
 
 @implementation L11AppSettingsController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
-
 -(id)specifiers {
     if (_specifiers == nil) {
 		NSMutableArray *testingSpecs = [[self loadSpecifiersFromPlistName:@"AppSettings" target:self] mutableCopy];
@@ -19,13 +11,6 @@
     
 	return _specifiers;
 }
-/*
--(void)viewWillAppear:(BOOL)view {
-    [super viewWillAppear:view];
-    
-    // [self reloadSpecifiers];
-}
-*/
 -(void)setSpecifier:(PSSpecifier*)specifier {
     [super setSpecifier:specifier];
     

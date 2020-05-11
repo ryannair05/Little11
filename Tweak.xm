@@ -363,9 +363,18 @@ extern "C" Boolean MGGetBoolAnswer(CFStringRef);
 %end
 %end
 
-%group disableGesturesWhenKeyboard
+%group disableGesturesWhenKeyboard // iOS 13.3 and below
 %hook SBFluidSwitcherGestureManager
 -(void)grabberTongueBeganPulling:(id)arg1 withDistance:(double)arg2 andVelocity:(double)arg3  {
+    if (!disableGestures)
+        %orig;
+}
+%end
+%end
+
+%group newDisableGesturesWhenKeyboard //iOS 13.4 and up
+%hook SBFluidSwitcherGestureManager
+- (void)grabberTongueBeganPulling:(id)arg1 withDistance:(double)arg2 andVelocity:(double)arg3 andGesture:(id)arg4  {
     if (!disableGestures)
         %orig;
 }
@@ -555,10 +564,10 @@ void loadPrefs() {
             NSDictionary const *appSettings = [prefs objectForKey:mainIdentifier];
     
             if (appSettings) {
-                wantsKeyboardDock = (BOOL)[[appSettings objectForKey:@"keyboardDock"]?:((NSNumber *)[NSNumber numberWithBool:wantsKeyboardDock]) boolValue];
-                wantsbottomInset = (BOOL)[[appSettings objectForKey:@"bottomInset"]?:((NSNumber *)[NSNumber numberWithBool:wantsbottomInset]) boolValue];
-                wantsDeviceSpoofing = (BOOL)[[appSettings objectForKey:@"deviceSpoofing"]?:((NSNumber *)[NSNumber numberWithBool:wantsDeviceSpoofing]) boolValue];
-                wantsCompatabilityMode = (BOOL)[[appSettings objectForKey:@"compatabilityMode"]?:((NSNumber *)[NSNumber numberWithBool:wantsCompatabilityMode]) boolValue];
+                wantsKeyboardDock = [appSettings objectForKey:@"keyboardDock"] ? [[appSettings objectForKey:@"keyboardDock"] boolValue] : wantsKeyboardDock;
+                wantsbottomInset = [appSettings objectForKey:@"bottomInset"] ? [[appSettings objectForKey:@"bottomInset"] boolValue] : wantsbottomInset;
+                wantsDeviceSpoofing = [appSettings objectForKey:@"deviceSpoofing"] ? [[appSettings objectForKey:@"deviceSpoofing"] boolValue] : wantsDeviceSpoofing;
+                wantsCompatabilityMode = [appSettings objectForKey:@"compatabilityMode"] ? [[appSettings objectForKey:@"compatabilityMode"] boolValue] : wantsCompatabilityMode;
             }
         }
     }
@@ -577,18 +586,17 @@ void loadPrefs() {
 
         if (enabled) {
 
-            if (statusBarStyle == 1) %init(StatusBariPad)      
-	        else if (statusBarStyle == 2) %init(StatusBarX);
-            else wantsHideSBCC = YES;
-	     
-            if (!wantsHomeBarLS) {
-                %init(hideHomeBarLS);
-                if (!wantsHomeBarSB) %init(completelyRemoveHomeBar);
-            }
-
             if (isSpringBoard) {
 
-                wantsCompatabilityMode = NO;
+                if (statusBarStyle == 1) %init(StatusBariPad)      
+                else if (statusBarStyle == 2) %init(StatusBarX);
+                else wantsHideSBCC = YES;
+
+                if (!wantsHomeBarLS) {
+                    %init(hideHomeBarLS);
+                    if (!wantsHomeBarSB) %init(completelyRemoveHomeBar);
+                }
+
                 if (wantsCCGrabber) %init(ccGrabber);
                 if (wantsBatteryPercent) %init(batteryPercent);
                 if (!wantsXButtons) %init(originalButtons);
@@ -632,8 +640,10 @@ void loadPrefs() {
                 [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardWillHideNotification object:nil queue:nil usingBlock:^(NSNotification *n){
                         disableGestures = false;
                     }];
-
-                %init(disableGesturesWhenKeyboard);
+                if (@available(iOS 13.4, *)) 
+                    %init(newDisableGesturesWhenKeyboard);
+                else
+                    %init(disableGesturesWhenKeyboard);
             }
             
             if (wantsProudLock) %init(ProudLock);

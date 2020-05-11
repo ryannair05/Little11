@@ -101,7 +101,7 @@ static OrderedDictionary *dataSourceUser;
     }
 
     if (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 0) {
-        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:NO];
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:YES];
     }
 
     if (([[prefs objectForKey:@"roundedAppSwitcher"] boolValue]) == 0) {
@@ -232,14 +232,14 @@ static OrderedDictionary *dataSourceUser;
 	  }
 
     }
-
+    
   else if ([key isEqualToString:@"statusBarStyle"]) {
 
       if ([value integerValue] == 0) {
-          [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:NO];
+          [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:YES];
       }
       else if (![self containsSpecifier:self.savedSpecifiers[@"HideSBCC"]]) {
-				[self insertContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] afterSpecifierID:@"batteryPercent" animated:NO];
+				[self insertContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] afterSpecifierID:@"batteryPercent" animated:YES];
 	  }
 
     }
@@ -304,7 +304,7 @@ static OrderedDictionary *dataSourceUser;
 
         self.detailTextLabel.text = _user;
 
-        if (!_user || self.avatarImage) {
+        if (!_user) {
             return self;
         }
 
@@ -326,11 +326,6 @@ static OrderedDictionary *dataSourceUser;
 
 #pragma mark - Avatar
 
-- (UIImage *)avatarImage
-{
-    return _avatarImageView.image;
-}
-
 - (void)setAvatarImage:(UIImage *)avatarImage
 {
     _avatarImageView.image = avatarImage;
@@ -348,9 +343,10 @@ static OrderedDictionary *dataSourceUser;
 
 + (NSString *)_urlForUsername:(NSString *)user {
 
-    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"aphelion://"]]) {
-        return [NSString stringWithFormat: @"aphelion://profile/%@", user];
-    } else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot://"]]) {
+    /* if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"aphelion://"]]) {
+        return [NSString stringWithFormat: @"aphelion://profile/%@", user]; // Easter egg by hbkirb
+    } else
+    */ if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot://"]]) {
         return [NSString stringWithFormat: @"tweetbot:///user_profile/%@", user];
     } else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitterrific://"]]) {
         return [NSString stringWithFormat: @"twitterrific:///profile?screen_name=%@", user];
@@ -365,9 +361,6 @@ static OrderedDictionary *dataSourceUser;
 
 - (void)setSelected:(BOOL)arg1 animated:(BOOL)arg2
 {
-    [super setSelected:arg1 animated:arg2];
-
-    if (!arg1) return;
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[self.class _urlForUsername:_user]] options:@{} completionHandler:nil];
+    if (arg1) [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[self.class _urlForUsername:_user]] options:@{} completionHandler:nil];
 }
 @end
