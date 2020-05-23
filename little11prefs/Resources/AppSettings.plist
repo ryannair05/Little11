@@ -44,7 +44,7 @@
 			<key>label</key>
 			<string>Misc Settings</string>
 			<key>footerText</key>
-			<string>Compatabiity mode improves the layout of some apps while making it worse for others. Settings apply for this app and need a respring to take effect.</string>
+			<string>Compatibility mode improves the layout of some apps while making it worse for others. Settings apply for this app and need a respring to take effect.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -56,7 +56,7 @@
 			<key>key</key>
 			<string>compatabilityMode</string>
 			<key>label</key>
-			<string>Compatabiity Mode</string>
+			<string>Compatibility Mode</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>

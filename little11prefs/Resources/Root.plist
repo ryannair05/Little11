@@ -128,6 +128,22 @@
 		</dict>
 		<dict>
 			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.ryannair05.little11prefs</string>
+			<key>key</key>
+			<string>roundedAppSwitcher</string>
+			<key>id</key>
+			<string>roundedAppSwitcherNoDock</string>
+			<key>label</key>
+			<string>Rounded App Switcher</string>
+			<key>PostNotification</key>
+			<string>com.ryannair05.little11prefs/prefsupdated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
 			<string>PSSliderCell</string>
 			<key>isSegmented</key>
 			<true/>
@@ -252,7 +268,7 @@
 			<key>key</key>
 			<string>compatabilityMode</string>
 			<key>label</key>
-			<string>Compatabiity Mode</string>
+			<string>Compatibility Mode</string>
 			<key>id</key>
 			<string>compatabilityMode</string>
 			<key>PostNotification</key>

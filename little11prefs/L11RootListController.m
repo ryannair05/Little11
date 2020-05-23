@@ -94,14 +94,26 @@ static OrderedDictionary *dataSourceUser;
 -(void)viewDidLoad {
     [super viewDidLoad];
 
-    NSMutableDictionary const *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
+    NSDictionary *prefs = [[NSDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
+
+    BOOL hasStatusBarOrInset = NO;
     
     if (([[prefs objectForKey:@"iPadDock"] boolValue]) == 0) {
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"iPadMultitasking"]] animated:YES];
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcherNoDock"]] animated:YES];
+    }
+    else {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcher"]] animated:YES];
     }
 
     if (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 0) {
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:YES];
+    }
+    else if  (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 2) {
+        hasStatusBarOrInset = YES;
+    }
+    if (([[prefs objectForKey:@"bottomInset"] boolValue]) == 1) {
+        hasStatusBarOrInset = YES;
     }
 
     if (([[prefs objectForKey:@"roundedAppSwitcher"] boolValue]) == 0) {
@@ -112,6 +124,49 @@ static OrderedDictionary *dataSourceUser;
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"screenRoundness"]] animated:YES];
     }
 
+    if (!hasStatusBarOrInset){
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"compatabilityMode"]] animated:YES];
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"deviceSpoofing"]] animated:YES];
+    }
+}
+
+-(void)reloadSpecifiers {
+    [super reloadSpecifiers];
+
+    NSDictionary *prefs = [[NSDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
+
+    BOOL hasStatusBarOrInset = NO;
+    
+    if (([[prefs objectForKey:@"iPadDock"] boolValue]) == 0) {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"iPadMultitasking"]] animated:NO];
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcherNoDock"]] animated:NO];
+    }
+    else {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcher"]] animated:NO];
+    }
+
+    if (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 0) {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:NO];
+    }
+    else if  (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 2) {
+        hasStatusBarOrInset = YES;
+    }
+    if (([[prefs objectForKey:@"bottomInset"] boolValue]) == 1) {
+        hasStatusBarOrInset = YES;
+    }
+
+    if (([[prefs objectForKey:@"roundedAppSwitcher"] boolValue]) == 0) {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"appswitcherRoundness"]] animated:NO];
+    }
+
+    if (([[prefs objectForKey:@"roundedCorners"] boolValue]) == 0) {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"screenRoundness"]] animated:NO];
+    }
+
+    if (!hasStatusBarOrInset){
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"compatabilityMode"]] animated:NO];
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"deviceSpoofing"]] animated:NO];
+    }
 }
 
 -(NSMutableArray*)appSpecifiers {
@@ -139,8 +194,8 @@ static OrderedDictionary *dataSourceUser;
         
         PSSpecifier *spe = [PSSpecifier preferenceSpecifierNamed:displayName target:self set:nil get:@selector(getIsWidgetSetForSpecifier:) detail:[L11AppSettingsController class] cell:PSLinkListCell edit:nil];
         [spe setProperty:@"IBKWidgetSettingsController" forKey:@"detail"];
-        [spe setProperty:[NSNumber numberWithBool:YES] forKey:@"isController"];
-        [spe setProperty:[NSNumber numberWithBool:YES] forKey:@"enabled"];
+        [spe setProperty:@YES forKey:@"isController"];
+        [spe setProperty:@YES forKey:@"enabled"];
         [spe setProperty:bundleIdentifier forKey:@"bundleIdentifier"];
         [spe setProperty:bundleIdentifier forKey:@"appIDForLazyIcon"];
         [spe setProperty:@YES forKey:@"useLazyIcons"];
@@ -172,7 +227,7 @@ static OrderedDictionary *dataSourceUser;
     
     for (NSString *value in sortedValues) {
         // Get key for value.
-        NSString *key = [[dict allKeysForObject:value] objectAtIndex:0];
+        NSString const *key = [[dict allKeysForObject:value] objectAtIndex:0];
         
         [mutable setObject:value forKey:key];
     }
@@ -201,13 +256,21 @@ static OrderedDictionary *dataSourceUser;
   }
 
   NSString const *key = [specifier propertyForKey:@"key"];
-  
+
+ BOOL hasStatusBarOrInset = NO;
+
   if ([key isEqualToString:@"iPadDock"]) {
       if ([value boolValue] == false) {
           [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"iPadMultitasking"]] animated:YES];
+          [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcherNoDock"]] animated:YES];
+          [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcher"]] afterSpecifierID:@"keyboardDock" animated:YES];
       }
-      else if(![self containsSpecifier:self.savedSpecifiers[@"iPadMultitasking"]]) {
+      else  {
+            if (![self containsSpecifier:self.savedSpecifiers[@"iPadMultitasking"]]) {
 				[self insertContiguousSpecifiers:@[self.savedSpecifiers[@"iPadMultitasking"]] afterSpecifierID:@"iPadDock" animated:YES];
+                [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcher"]] animated:YES];
+                [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcherNoDock"]] afterSpecifierID:@"keyboardDock" animated:YES];
+        }
 	}
   }
 
@@ -217,19 +280,22 @@ static OrderedDictionary *dataSourceUser;
           [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"appswitcherRoundness"]] animated:YES];
       }
       else if (![self containsSpecifier:self.savedSpecifiers[@"appswitcherRoundness"]]) {
-				[self insertContiguousSpecifiers:@[self.savedSpecifiers[@"appswitcherRoundness"]] afterSpecifierID:@"roundedAppSwitcher" animated:YES];
+            if ([self containsSpecifier:self.savedSpecifiers[@"roundedAppSwitcher"]])
+                [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"appswitcherRoundness"]] afterSpecifierID:@"roundedAppSwitcher" animated:YES];
+            else
+                [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"appswitcherRoundness"]] afterSpecifierID:@"roundedAppSwitcherNoDock" animated:YES];
 	  }
 
     }
 
     else if ([key isEqualToString:@"roundedCorners"]) {
 
-      if ([value boolValue] == false) {
-          [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"screenRoundness"]] animated:YES];
-      }
-      else if (![self containsSpecifier:self.savedSpecifiers[@"screenRoundness"]]) {
-				[self insertContiguousSpecifiers:@[self.savedSpecifiers[@"screenRoundness"]] afterSpecifierID:@"roundedCorners" animated:YES];
-	  }
+        if ([value boolValue] == false) {
+            [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"screenRoundness"]] animated:YES];
+        }
+        else if (![self containsSpecifier:self.savedSpecifiers[@"screenRoundness"]]) {
+                [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"screenRoundness"]] afterSpecifierID:@"roundedCorners" animated:YES];
+        }
 
     }
     
@@ -238,22 +304,46 @@ static OrderedDictionary *dataSourceUser;
       if ([value integerValue] == 0) {
           [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:YES];
       }
-      else if (![self containsSpecifier:self.savedSpecifiers[@"HideSBCC"]]) {
-				[self insertContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] afterSpecifierID:@"batteryPercent" animated:YES];
-	  }
+      
+      else  {
+            if ([value integerValue] == 2) {
+                hasStatusBarOrInset = YES;
+            }
 
+          if (![self containsSpecifier:self.savedSpecifiers[@"HideSBCC"]]) {
+				[self insertContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] afterSpecifierID:@"batteryPercent" animated:YES];
+	    }
     }
-}
+  }
+
+    else if ([key isEqualToString:@"bottomInset"]) {
+      if ([value boolValue] == true) {
+           hasStatusBarOrInset = YES;
+      }
+    }
+    
+    if (hasStatusBarOrInset) {
+        if (![self containsSpecifier:self.savedSpecifiers[@"compatabilityMode"]]) {
+            if ([self containsSpecifier:self.savedSpecifiers[@"screenRoundness"]])
+                [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"compatabilityMode"]] afterSpecifierID:@"screenRoundness" animated:YES];
+            else 
+                [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"compatabilityMode"]] afterSpecifierID:@"roundedCorners" animated:YES];
+
+            [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"deviceSpoofing"]] afterSpecifierID:@"compatabilityMode" animated:YES];
+        }
+    }
+
+    else {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"compatabilityMode"]] animated:YES];
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"deviceSpoofing"]] animated:YES];
+    }
+} 
+  
 
 - (void)respring:(id)sender {
     pid_t pid;
     const char* args[] = {"sbreload", NULL};
     posix_spawn(&pid, "/usr/bin/sbreload", NULL, NULL, (char* const*)args, NULL);
-}
-@end
-
-@interface L11TwitterCell () {
-    NSString *_user;
 }
 @end
 
@@ -274,7 +364,7 @@ static OrderedDictionary *dataSourceUser;
         self.textLabel.textColor = [UIColor blackColor];
         self.tintColor = [UIColor labelColor];
 
-        CGFloat size = 29.f;
+        CGFloat const size = 29.f;
 
         UIGraphicsBeginImageContextWithOptions(CGSizeMake(size, size), NO, [UIScreen mainScreen].scale);
         specifier.properties[@"iconImage"] = UIGraphicsGetImageFromCurrentImageContext();
@@ -308,8 +398,8 @@ static OrderedDictionary *dataSourceUser;
             return self;
         }
 
-        /*self.avatarImage = [UIImage imageNamed:[NSString stringWithFormat:@"/Library/PreferenceBundles/little11prefs.bundle/%@.png", _user]];
-         */
+        // self.avatarImage = [UIImage imageNamed:[NSString stringWithFormat:@"/Library/PreferenceBundles/little11prefs.bundle/%@.png", _user]];
+         
 
         // This has a delay as image needs to be downloaded
         dispatch_async(dispatch_get_global_queue(0,0), ^{
@@ -340,27 +430,27 @@ static OrderedDictionary *dataSourceUser;
     }
 }
 
++ (NSURL *)_urlForUsername:(NSString *)user {
 
-+ (NSString *)_urlForUsername:(NSString *)user {
-
-    /* if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"aphelion://"]]) {
+/*    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"aphelion://"]]) {
         return [NSString stringWithFormat: @"aphelion://profile/%@", user]; // Easter egg by hbkirb
-    } else
-    */ if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot://"]]) {
-        return [NSString stringWithFormat: @"tweetbot:///user_profile/%@", user];
+    } else*/
+     
+    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot://"]]) {
+        return [NSURL URLWithString: [NSString stringWithFormat : @"tweetbot:///user_profile/%@", user]];
     } else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitterrific://"]]) {
-        return [NSString stringWithFormat: @"twitterrific:///profile?screen_name=%@", user];
+        return [NSURL URLWithString: [NSString stringWithFormat : @"twitterrific:///profile?screen_name=%@", user]];
     } else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetings://"]]) {
-        return [NSString stringWithFormat: @"tweetings:///user?screen_name=%@", user];
+        return [NSURL URLWithString: [NSString stringWithFormat : @"tweetings:///user?screen_name=%@", user]];
     } else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitter://"]]) {
-        return [NSString stringWithFormat: @"twitter://user?screen_name=%@", user];
+        return [NSURL URLWithString: [NSString stringWithFormat : @"twitter://user?screen_name=%@", user]];
     } else {
-        return [NSString stringWithFormat: @"https://mobile.twitter.com/%@", user];
+        return [NSURL URLWithString: [NSString stringWithFormat : @"https://mobile.twitter.com/%@", user]];
     }
 }
 
 - (void)setSelected:(BOOL)arg1 animated:(BOOL)arg2
 {
-    if (arg1) [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[self.class _urlForUsername:_user]] options:@{} completionHandler:nil];
+    if (arg1) [[UIApplication sharedApplication] openURL:[self.class _urlForUsername:_user] options:@{} completionHandler:nil];
 }
 @end

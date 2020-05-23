@@ -1,6 +1,6 @@
 include $(THEOS)/makefiles/common.mk
 
-ARCHS = arm64
+ARCHS = arm64 arm64e
 
 BUNDLE_NAME = little11prefs
 little11prefs_FILES = L11RootListController.m L11AppSettingsController.m OrderedDictionary.m

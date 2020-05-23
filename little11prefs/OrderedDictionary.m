@@ -68,19 +68,4 @@
 {
 	return [array objectEnumerator];
 }
-
-- (void)insertObject:(id)anObject forKey:(id)aKey atIndex:(NSUInteger)anIndex
-{
-	if ([dictionary objectForKey:aKey])
-	{
-		[self removeObjectForKey:aKey];
-	}
-	[array insertObject:aKey atIndex:anIndex];
-	[dictionary setObject:anObject forKey:aKey];
-}
-
-- (id)keyAtIndex:(NSUInteger)anIndex
-{
-	return [array objectAtIndex:anIndex];
-}
 @end

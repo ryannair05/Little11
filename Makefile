@@ -11,7 +11,7 @@ TWEAK_NAME = Little11
 Little11_FILES = Tweak.xm
 Little11_LIBRARIES = MobileGestalt
 
-ARCHS = arm64
+ARCHS = arm64 arm64e
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 

@@ -18,9 +18,12 @@
 @end
 
 @interface L11TwitterCell : PSTableCell
-
 @property (nonatomic, retain, readonly) UIView *avatarView;
 @property (nonatomic, retain, readonly) UIImageView *avatarImageView;
 @end
 
+@interface L11TwitterCell () {
+    NSString *_user;
+}
+@end
 
