@@ -43,15 +43,9 @@ BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
 %end
 
 %group HideSBCC
-%hook CCUIStatusBarStyleSnapshot
--(BOOL)isHidden {
-    return YES;
-}
-%end
-
-%hook CCUIOverlayStatusBarPresentationProvider
-- (void)_addHeaderContentTransformAnimationToBatch:(id)arg1 transitionState:(id)arg2 {
-   return;
+%hook CCUIModularControlCenterOverlayViewController
+- (CCUIHeaderPocketView*)overlayHeaderView {
+    return nil;
 }
 %end
 %end
@@ -313,8 +307,6 @@ extern "C" Boolean MGGetBoolAnswer(CFStringRef);
 #define keyy(key_) CFEqual(key, CFSTR(key_))
     if (keyy("nVh/gwNpy7Jv1NOk00CMrw"))
         return wantsPIP;
-    else if (keyy("z5G/N9jcMdgPm8UegLwbKg")) 
-        return wantsProudLock;
     return %orig;
 }
 
@@ -325,6 +317,94 @@ extern "C" Boolean MGGetBoolAnswer(CFStringRef);
 }
 -(BOOL)hasMesaSupport {
     return NO;
+}
+%end
+
+@interface SBDashBoardMesaUnlockBehaviorConfiguration : NSObject
+- (BOOL)_isAccessibilityRestingUnlockPreferenceEnabled;
+@end
+
+@interface SBDashBoardBiometricUnlockController : NSObject
+@end
+
+@interface SBLockScreenController : NSObject
++ (id)sharedInstance;
+- (BOOL)_finishUIUnlockFromSource:(int)arg1 withOptions:(id)arg2;
+@end
+
+CGFloat offset = 0;
+
+%hook SBFLockScreenDateView
+-(id)initWithFrame:(CGRect)arg1 {
+    CGFloat const screenWidth = UIScreen.mainScreen.bounds.size.width;
+
+	if (screenWidth <= 320) {
+		offset = 20;
+	} else if (screenWidth <= 375) {
+		offset = 35;
+	} else if (screenWidth <= 414) {
+		offset = 28;
+	}
+
+    return %orig;
+}
+- (void)layoutSubviews {
+	%orig;
+
+	UIView* timeView = MSHookIvar<UIView*>(self, "_timeLabel");
+	UIView* dateSubtitleView = MSHookIvar<UIView*>(self, "_dateSubtitleView");
+	UIView* customSubtitleView = MSHookIvar<UIView*>(self, "_customSubtitleView");
+	
+	[timeView setFrame:CGRectSetY(timeView.frame, timeView.frame.origin.y + offset)];
+	[dateSubtitleView setFrame:CGRectSetY(dateSubtitleView.frame, dateSubtitleView.frame.origin.y + offset)];
+	[customSubtitleView setFrame:CGRectSetY(customSubtitleView.frame, customSubtitleView.frame.origin.y + offset)];
+}
+%end
+
+%hook SBDashBoardLockScreenEnvironment
+- (void)handleBiometricEvent:(unsigned long long)arg1 {
+	%orig;
+
+	if (arg1 == 4) {
+		SBDashBoardBiometricUnlockController* biometricUnlockController = MSHookIvar<SBDashBoardBiometricUnlockController*>(self, "_biometricUnlockController");
+		SBDashBoardMesaUnlockBehaviorConfiguration* unlockBehavior = MSHookIvar<SBDashBoardMesaUnlockBehaviorConfiguration*>(biometricUnlockController, "_biometricUnlockBehaviorConfiguration");
+		
+		if ([unlockBehavior _isAccessibilityRestingUnlockPreferenceEnabled]) {
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+				[[%c(SBLockScreenManager) sharedInstance] _finishUIUnlockFromSource:12 withOptions:nil];
+			});
+		}
+	}
+}
+%end
+
+%hook BSUICAPackageView
+- (id)initWithPackageName:(id)arg1 inBundle:(id)arg2 {
+	if (![arg1 hasPrefix:@"lock"]) return %orig;
+	
+	NSString* packageName = [arg1 stringByAppendingString:@"-896h"];
+
+	return %orig(packageName, [NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/SpringBoardUIServices.framework"]);
+}
+%end
+
+%hook CSCombinedListViewController
+- (UIEdgeInsets)_listViewDefaultContentInsets {
+    UIEdgeInsets orig = %orig;
+
+    orig.top += offset;
+    return orig;
+}
+%end
+
+%hook SBUIBiometricResource
+- (id)init {
+	id r = %orig;
+	
+	MSHookIvar<BOOL>(r, "_hasMesaHardware") = NO;
+	MSHookIvar<BOOL>(r, "_hasPearlHardware") = YES;
+	
+	return r;
 }
 %end
 %end
@@ -601,50 +681,57 @@ void loadPrefs() {
                 if (wantsRoundedCorners) %init(roundedCorners);
                 if (wantsiPadDock) %init(iPadDock);
                 if (wantsiPadMultitasking) %init(iPadMultitasking)
+                if (wantsProudLock) %init(ProudLock);
                 %init(reduceRows);
 
             } else {
 
                 NSString* const bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
 
-                if ([bundleIdentifier isEqualToString:@"com.google.ios.youtube"])
-                    wantsCompatabilityMode = YES;
-                else if ([bundleIdentifier isEqualToString:@"com.facebook.Facebook"]) 
-                    wantsbottomInset = YES;
-                else if ([bundleIdentifier isEqualToString:@"com.zhiliaoapp.musically"])
-                    wantsDeviceSpoofing = YES;
-                else if (wants11Camera && [bundleIdentifier isEqualToString:@"com.apple.camera"]) {
+                if ([bundleIdentifier containsString:@"com.apple"]) {
+                    if (wants11Camera && [bundleIdentifier isEqualToString:@"com.apple.camera"])
                     %init(iPhone11Cam);
                 }
+                
+                else {
 
-                if (wantsbottomInset || statusBarStyle == 2) {
+                    if ([bundleIdentifier isEqualToString:@"com.google.ios.youtube"])
+                        wantsCompatabilityMode = YES;
+                    else if ([bundleIdentifier isEqualToString:@"com.facebook.Facebook"]) 
+                        wantsbottomInset = YES;
+                    else if ([bundleIdentifier isEqualToString:@"com.zhiliaoapp.musically"])
+                        wantsDeviceSpoofing = YES;
 
-                    %init(InstagramFix);
+                    if (wantsbottomInset || statusBarStyle == 2) {
 
-                    if (wantsCompatabilityMode) %init(CompatabilityMode);
-                    if (wantsDeviceSpoofing) %init(BoundsHack);
-                    if (wantsbottomInset) %init(CameraFix); 
-                    else %init(bottominsetfix);
-                } 
+                        %init(InstagramFix);
+
+                        if (wantsCompatabilityMode) %init(CompatabilityMode);
+                        if (wantsDeviceSpoofing) %init(BoundsHack);
+                        if (wantsbottomInset) %init(CameraFix); 
+                        else %init(bottominsetfix);
+                    } 
+                }
             }
 
-            if (wantsKeyboardDock) %init(KeyboardDock);
-            else %init(ForceDefaultKeyboard);
+            if (![[NSFileManager defaultManager] fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/KeyboardPlus.dylib"]) {
 
-            if (wantsGesturesDisabledWhenKeyboard) {
-                [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardDidShowNotification object:nil queue:nil usingBlock:^(NSNotification *n){
-                       disableGestures = true;
-                    }];
-                [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardWillHideNotification object:nil queue:nil usingBlock:^(NSNotification *n){
-                        disableGestures = false;
-                    }];
-                if (@available(iOS 13.4, *)) 
-                    %init(newDisableGesturesWhenKeyboard);
-                else
-                    %init(disableGesturesWhenKeyboard);
+                if (wantsKeyboardDock) %init(KeyboardDock);
+                else %init(ForceDefaultKeyboard);
+
+                if (wantsGesturesDisabledWhenKeyboard) {
+                    [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardDidShowNotification object:nil queue:nil usingBlock:^(NSNotification *n){
+                            disableGestures = true;
+                        }];
+                    [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardWillHideNotification object:nil queue:nil usingBlock:^(NSNotification *n){
+                            disableGestures = false;
+                        }];
+                    if (@available(iOS 13.4, *)) 
+                        %init(newDisableGesturesWhenKeyboard);
+                    else
+                        %init(disableGesturesWhenKeyboard);
+                }
             }
-            
-            if (wantsProudLock) %init(ProudLock);
             %init;
         }
     }

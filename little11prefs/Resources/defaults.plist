@@ -12,12 +12,14 @@
 	<integer>0</integer>
 	<key>enabled</key>
 	<true/>
+	<key>firstTime</key>
+	<true/>
 	<key>homeBarLS</key>
 	<false/>
 	<key>deviceSpoofing</key>
 	<false/>
 	<key>compatabilityMode</key>
-	<true/>
+	<false/>
 	<key>homeBarSB</key>
 	<false/>
 	<key>noGesturesForKeyboard</key>

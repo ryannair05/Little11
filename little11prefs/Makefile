@@ -5,7 +5,7 @@ ARCHS = arm64 arm64e
 BUNDLE_NAME = little11prefs
 little11prefs_FILES = L11RootListController.m L11AppSettingsController.m OrderedDictionary.m
 little11prefs_INSTALL_PATH = /Library/PreferenceBundles
-little11prefs_PRIVATE_FRAMEWORKS = Preferences SpringBoardServices
+little11prefs_PRIVATE_FRAMEWORKS = Preferences SpringBoardServices OnBoardingKit
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

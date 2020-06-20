@@ -11,7 +11,7 @@ extern "C" {
 }
 #endif
 
-static OrderedDictionary *dataSourceUser;
+OBWelcomeController *welcomeController;
 
 @implementation L11RootListController
 
@@ -72,6 +72,7 @@ static OrderedDictionary *dataSourceUser;
 }
 
 - (NSArray *)specifiers {
+
 	if (_specifiers == nil) {
 		NSMutableArray *testingSpecs = [[self loadSpecifiersFromPlistName:@"Root" target:self] mutableCopy];
                 
@@ -86,9 +87,63 @@ static OrderedDictionary *dataSourceUser;
 				[self.savedSpecifiers setObject:specifier forKey:[specifier propertyForKey:@"id"]];
 		    }
 		}
+
+        NSDictionary const *prefs = [[NSDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
+
+        BOOL firstTime;
+
+        if ([prefs objectForKey:@"firstTime"]) {
+            firstTime = [[prefs objectForKey:@"firstTime"] boolValue];
+        }
+        else
+            firstTime = YES;
+            
+        if (firstTime) {
+
+            welcomeController = [[OBWelcomeController alloc] initWithTitle:@"Welcome to Little11" detailText:@"Little11 Brings iPhone 11 Gestures and Features to all devices!" icon:[UIImage systemImageNamed:@"gear"]];
+
+            [welcomeController addBulletedListItemWithTitle:@"The Tweak" description:@"The iPhone X Gestures should be available on all devices, and so Little11 brings these fluid gestures to your device." image:[UIImage systemImageNamed:@"1.circle.fill"]];
+            [welcomeController addBulletedListItemWithTitle:@"App Support" description:@"The majority of apps work with Little11 without an issue. For the exceptions, I'm doing my best to fix them though sometimes it can prove to be a challenge. Turning on or off the compatibility mode and/or device spoofing settings may improve or worsen certain apps. " image:[UIImage systemImageNamed:@"2.circle.fill"]];
+            [welcomeController addBulletedListItemWithTitle:@"Support" description:@"Little11 is made to be the best possible, but there are still some issues unfortunately. To report issues and for support I can be contacted over Email, Discord, Twitter, Reddit, and Github." image:[UIImage systemImageNamed:@"3.circle.fill"]];
+            [welcomeController addBulletedListItemWithTitle:@"Open Source" description:@"Little11 is open source and can be found on Github. Feel free to check out the code anytime and even make a pull request." image:[UIImage systemImageNamed:@"4.circle.fill"]];
+
+            OBBoldTrayButton* continueButton = [OBBoldTrayButton buttonWithType:1];
+            [continueButton addTarget:self action:@selector(dismissWelcomeController) forControlEvents:UIControlEventTouchUpInside];
+            [continueButton setTitle:@"Continue" forState:UIControlStateNormal];
+            [continueButton setClipsToBounds:YES];
+            [continueButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal]; 
+            [continueButton.layer setCornerRadius:19]; 
+            [welcomeController.buttonTray addButton:continueButton];
+            
+            welcomeController.buttonTray.effectView.effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemChromeMaterial];
+            
+            UIVisualEffectView *effectWelcomeView = [[UIVisualEffectView alloc] initWithFrame:welcomeController.viewIfLoaded.bounds];
+            
+            effectWelcomeView.effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemChromeMaterial];
+            
+            [welcomeController.viewIfLoaded insertSubview:effectWelcomeView atIndex:0];       
+
+            welcomeController.viewIfLoaded.backgroundColor = [UIColor clearColor];
+
+            [welcomeController.buttonTray addCaptionText:@"Thank you for your using Little11!"];
+
+            welcomeController.modalPresentationStyle = UIModalPresentationPageSheet;
+            welcomeController.modalInPresentation = YES;
+            welcomeController.view.tintColor = [UIColor systemBlueColor];
+            [self presentViewController:welcomeController animated:YES completion:nil];
+        }
     }
-    
 	return _specifiers;
+}
+
+-(void)dismissWelcomeController { 
+    [welcomeController dismissViewControllerAnimated:YES completion:nil];
+    
+    NSMutableDictionary const *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
+
+    [prefs setValue:[NSNumber numberWithBool:NO] forKey:@"firstTime"]; 
+
+    [prefs writeToFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist" atomically:YES]; 
 }
 
 -(void)viewDidLoad {
@@ -127,6 +182,11 @@ static OrderedDictionary *dataSourceUser;
     if (!hasStatusBarOrInset){
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"compatabilityMode"]] animated:YES];
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"deviceSpoofing"]] animated:YES];
+    }
+
+    if ([[NSFileManager defaultManager] fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/KeyboardPlus.dylib"]) {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"keyboardDock"]] animated:YES];
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"noGesturesForKeyboard"]] animated:YES];
     }
 }
 
@@ -167,6 +227,11 @@ static OrderedDictionary *dataSourceUser;
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"compatabilityMode"]] animated:NO];
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"deviceSpoofing"]] animated:NO];
     }
+
+    if ([[NSFileManager defaultManager] fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/KeyboardPlus.dylib"]) {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"keyboardDock"]] animated:NO];
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"noGesturesForKeyboard"]] animated:YES];
+    }
 }
 
 -(NSMutableArray*)appSpecifiers {
@@ -181,9 +246,8 @@ static OrderedDictionary *dataSourceUser;
             [apps setObject:appName forKey:appIdentifier];
         }
     }
-
-    dataSourceUser = (OrderedDictionary*)[apps copy];
-    dataSourceUser = (OrderedDictionary*)[self trimDataSource:dataSourceUser];
+    OrderedDictionary *dataSourceUser = (OrderedDictionary*)[apps copy];
+    dataSourceUser = [self trimDataSource:dataSourceUser];
     dataSourceUser = [self sortedDictionary:dataSourceUser];
     
     PSSpecifier* groupSpecifier = [PSSpecifier groupSpecifierWithName:@"Per-app Customization:"];
@@ -206,8 +270,8 @@ static OrderedDictionary *dataSourceUser;
     return specifiers;
 }
 
--(NSDictionary*)trimDataSource:(NSDictionary*)dataSource {
-    NSMutableDictionary *mutable = [dataSource mutableCopy];
+-(OrderedDictionary*)trimDataSource:(OrderedDictionary*)dataSource {
+    OrderedDictionary *mutable = [dataSource mutableCopy];
     
     NSArray *bannedIdentifiers = [[NSArray alloc] initWithObjects:
                                   @"com.apple.sidecar",
@@ -256,20 +320,39 @@ static OrderedDictionary *dataSourceUser;
   }
 
   NSString const *key = [specifier propertyForKey:@"key"];
+    
+  NSDictionary *prefs = [[NSDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
 
  BOOL hasStatusBarOrInset = NO;
+    
+  if (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 0) {
+        [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:YES];
+  }
+  else {
+        if  (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 2)
+           hasStatusBarOrInset = YES;
+        
+        if (![self containsSpecifier:self.savedSpecifiers[@"HideSBCC"]])
+            [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] afterSpecifierID:@"batteryPercent" animated:YES];
+  }
 
   if ([key isEqualToString:@"iPadDock"]) {
       if ([value boolValue] == false) {
-          [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"iPadMultitasking"]] animated:YES];
-          [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcherNoDock"]] animated:YES];
-          [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcher"]] afterSpecifierID:@"keyboardDock" animated:YES];
+            [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"iPadMultitasking"]] animated:YES];
+            [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcherNoDock"]] animated:YES];
+            if ([self containsSpecifier:self.savedSpecifiers[@"keyboardDock"]])
+                [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcher"]] afterSpecifierID:@"keyboardDock" animated:YES];
+            else 
+                [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcher"]] afterSpecifierID:@"homeBarLS" animated:YES];
       }
       else  {
             if (![self containsSpecifier:self.savedSpecifiers[@"iPadMultitasking"]]) {
 				[self insertContiguousSpecifiers:@[self.savedSpecifiers[@"iPadMultitasking"]] afterSpecifierID:@"iPadDock" animated:YES];
                 [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcher"]] animated:YES];
-                [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcherNoDock"]] afterSpecifierID:@"keyboardDock" animated:YES];
+                if ([self containsSpecifier:self.savedSpecifiers[@"keyboardDock"]])
+                    [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcherNoDock"]] afterSpecifierID:@"keyboardDock" animated:YES];
+                else 
+                    [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"roundedAppSwitcherNoDock"]] afterSpecifierID:@"homeBarLS" animated:YES];
         }
 	}
   }
@@ -298,23 +381,6 @@ static OrderedDictionary *dataSourceUser;
         }
 
     }
-    
-  else if ([key isEqualToString:@"statusBarStyle"]) {
-
-      if ([value integerValue] == 0) {
-          [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:YES];
-      }
-      
-      else  {
-            if ([value integerValue] == 2) {
-                hasStatusBarOrInset = YES;
-            }
-
-          if (![self containsSpecifier:self.savedSpecifiers[@"HideSBCC"]]) {
-				[self insertContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] afterSpecifierID:@"batteryPercent" animated:YES];
-	    }
-    }
-  }
 
     else if ([key isEqualToString:@"bottomInset"]) {
       if ([value boolValue] == true) {
@@ -399,18 +465,35 @@ static OrderedDictionary *dataSourceUser;
         }
 
         // self.avatarImage = [UIImage imageNamed:[NSString stringWithFormat:@"/Library/PreferenceBundles/little11prefs.bundle/%@.png", _user]];
-         
 
         // This has a delay as image needs to be downloaded
         dispatch_async(dispatch_get_global_queue(0,0), ^{
-            NSData * data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://twitter.com/%@/profile_image?size=original", _user]]];
-            if (data == nil)
+            
+            NSString *size = [UIScreen mainScreen].scale > 2 ? @"original" : @"bigger";
+            NSError __block *err = NULL;
+            NSData __block *data;
+            BOOL __block reqProcessed = false;
+            NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://mobile.twitter.com/%@/profile_image?size=%@", _user, size]]];
+            
+            [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData  *_data, NSURLResponse *_response, NSError *_error) {
+                err = _error;
+                data = _data;
+                reqProcessed = true;
+            }] resume];
+
+            while (!reqProcessed) {
+                [NSThread sleepForTimeInterval:0];
+            }
+
+            if (err)
                 return;
+                
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.avatarImage = [UIImage imageWithData: data];
+                    self.avatarImage = [UIImage imageWithData: data];
             });
         });
     }
+
     return self;
 }
 
@@ -437,15 +520,15 @@ static OrderedDictionary *dataSourceUser;
     } else*/
      
     if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot://"]]) {
-        return [NSURL URLWithString: [NSString stringWithFormat : @"tweetbot:///user_profile/%@", user]];
+        return [NSURL URLWithString: [@"tweetbot:///user_profile/" stringByAppendingString:user]];
     } else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitterrific://"]]) {
-        return [NSURL URLWithString: [NSString stringWithFormat : @"twitterrific:///profile?screen_name=%@", user]];
+        return [NSURL URLWithString: [@"twitterrific:///profile?screen_name=" stringByAppendingString:user]];
     } else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetings://"]]) {
-        return [NSURL URLWithString: [NSString stringWithFormat : @"tweetings:///user?screen_name=%@", user]];
-    } else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitter://"]]) {
-        return [NSURL URLWithString: [NSString stringWithFormat : @"twitter://user?screen_name=%@", user]];
-    } else {
-        return [NSURL URLWithString: [NSString stringWithFormat : @"https://mobile.twitter.com/%@", user]];
+        return [NSURL URLWithString: [@"tweetings:///user?screen_name=" stringByAppendingString:user]];
+    } /*else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitter://"]]) {
+        return [NSURL URLWithString: [@"twitter://user?screen_name=" stringByAppendingString:user]];
+    }*/ else {
+        return [NSURL URLWithString: [@"https://mobile.twitter.com/" stringByAppendingString:user]];
     }
 }
 

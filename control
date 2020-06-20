@@ -1,7 +1,7 @@
 Package: com.ryannair05.little11
 Name: Little11
-Depends: mobilesubstrate, preferenceloader
-Version: 1.4.0
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
+Version: 1.4.1
 Architecture: iphoneos-arm
 Description: iPhone 11 gestures and more for iOS 13.
 Maintainer: Ryan Nair

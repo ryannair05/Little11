@@ -422,7 +422,7 @@
 			<key>id</key>
 			<string>ProudLock</string>
 			<key>label</key>
-			<string>FaceID Animations [BETA]</string>
+			<string>FaceID Animations</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
