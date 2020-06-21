@@ -8,10 +8,12 @@ BOOL enabled, wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedApp
 BOOL disableGestures = NO, wantsGesturesDisabledWhenKeyboard, wantsCCGrabber, wantsPIP, wantsProudLock, wantsHideSBCC,wantsLSShortcuts, wantsBatteryPercent, wantsiPadDock;
 BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
 
+%group enabled
 %hook BSPlatform
 - (NSInteger)homeButtonType {
 	return 2;
 }
+%end
 %end
 
 %group ForceDefaultKeyboard
@@ -663,6 +665,8 @@ void loadPrefs() {
             bool const isSpringBoard = [@"SpringBoard" isEqualToString:[NSProcessInfo processInfo].processName];
 
             if (isSpringBoard) {
+
+                %init(enabled);
 
                 if (statusBarStyle == 1) %init(StatusBariPad)      
                 else if (statusBarStyle == 2) %init(StatusBarX);
