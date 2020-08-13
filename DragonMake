@@ -1,0 +1,32 @@
+---
+name: Little11
+icmd: sbreload
+
+all:
+  targetvers: 13.2
+  archs:
+    - arm64
+    - arm64e
+  optim: 3
+
+Little11SpringBoard:
+    type: tweak
+    logos_files:
+        - "TweakSpring.xm"
+Little11UIKit:
+    type: tweak
+    logos_files:
+        - "TweakUI.xm"
+    libs:
+        - MobileGestalt
+little11prefs:
+    dir: little11prefs
+    type: prefs
+    objc_files:
+        - OrderedDictionary.m
+        - L11AppSettingsController.m
+        - L11RootListController.m
+    frameworks:
+        - Preferences
+        - SpringBoardServices
+        - OnBoardingKit

@@ -44,7 +44,7 @@
 			<key>id</key>
 			<string>statusBarStyle</string>
 			<key>label</key>
-			<string>Status Bar Style</string>
+			<string>Status Bar</string>
 			<key>detail</key>
 			<string>PSListItemsController</string>
 			<key>validValues</key>
@@ -52,15 +52,15 @@
 				<integer>0</integer>
 				<integer>1</integer>
 				<integer>2</integer>
+				<integer>3</integer>
 			</array>
 			<key>validTitles</key>
 			<array>
 				<string>Default Status Bar</string>
 				<string>iPad Status Bar</string>
 				<string>iPhone X Status Bar</string>
+				<string>iPhone X Status Bar Without Spacing</string>
 			</array>
-			<key>PostNotification</key>
-			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -90,7 +90,7 @@
 			<key>id</key>
 			<string>homeBarLS</string>
 			<key>label</key>
-			<string>Home Bar in CoverSheet</string>
+			<string>Home Bar in Cover Sheet</string>
 			<key>PostNotification</key>
 			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
@@ -197,8 +197,6 @@
 			<string>xButtons</string>
 			<key>label</key>
 			<string>iPhone X Button Combo [BETA]</string>
-			<key>PostNotification</key>
-			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
 			<dict>
 			<key>cell</key>
@@ -327,8 +325,6 @@
 			<string>iPad Dock</string>
 			<key>id</key>
 			<string>iPadDock</string>
-			<key>PostNotification</key>
-			<string>com.ryannair05.little11prefs/prefsupdated</string>
 		</dict>
 		<dict>
 			<key>cell</key>

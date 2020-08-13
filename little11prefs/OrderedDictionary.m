@@ -25,11 +25,6 @@
 
 @implementation OrderedDictionary
 
-- (id)init
-{
-	return [super initWithCapacity:0];
-}
-
 - (id)initWithCapacity:(NSUInteger)capacity
 {
 	self = [super init];

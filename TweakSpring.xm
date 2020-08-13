@@ -1,26 +1,15 @@
 #import <UIKit/UIKit.h>
-#include <sys/sysctl.h>
-#include <sys/utsname.h>
 #define CGRectSetY(rect, y) CGRectMake(rect.origin.x, y, rect.size.width, rect.size.height)
 
 NSInteger statusBarStyle, screenRoundness, appswitcherRoundness;
-BOOL enabled, wantsHomeBarSB, wantsHomeBarLS, wantsKeyboardDock, wantsRoundedAppSwitcher, wantsReduceRows, wantsRoundedCorners, wants11Camera, wantsXButtons, wantsbottomInset;
-BOOL disableGestures = NO, wantsGesturesDisabledWhenKeyboard, wantsCCGrabber, wantsPIP, wantsProudLock, wantsHideSBCC,wantsLSShortcuts, wantsBatteryPercent, wantsiPadDock;
-BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
+BOOL enabled, wantsHomeBarSB, wantsHomeBarLS, wantsRoundedAppSwitcher, wantsReduceRows, wantsRoundedCorners, wantsXButtons;
+BOOL wantsCCGrabber, wantsProudLock, wantsHideSBCC,wantsLSShortcuts, wantsBatteryPercent, wantsiPadDock;
+BOOL wantsiPadMultitasking;
 
 %hook BSPlatform
 - (NSInteger)homeButtonType {
 	return 2;
 }
-%end
-
-%group ForceDefaultKeyboard
-%hook UIKeyboardImpl
-+(UIEdgeInsets)deviceSpecificPaddingForInterfaceOrientation:(NSInteger)orientation inputMode:(id)mode {
-    UIEdgeInsets const orig = %orig;    
-    return UIEdgeInsetsMake(orig.top, 0, 0, 0);
-}
-%end
 %end
 
 @interface CSQuickActionsView : UIView
@@ -38,7 +27,7 @@ BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
     int const y = screenBounds.size.height - 90 - [self _buttonOutsets].top;
 
     [self flashlightButton].frame = CGRectMake(46, y, 50, 50);
-	[self cameraButton].frame = CGRectMake(screenBounds.size.width - 96, y, 50, 50);
+    [self cameraButton].frame = CGRectMake(screenBounds.size.width - 96, y, 50, 50);
 }
 %end
 
@@ -79,7 +68,7 @@ BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
 %group StatusBarX
 %hook _UIStatusBarVisualProvider_iOS
 + (Class)class {
-    return NSClassFromString(@"_UIStatusBarVisualProvider_Split58");
+    return %c(_UIStatusBarVisualProvider_Split58);
 }
 %end
 
@@ -87,22 +76,22 @@ BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
 - (UIEdgeInsets)portraitLayoutInsets { 
     UIEdgeInsets const x = %orig;
     NSUInteger const locationRows = MSHookIvar<NSUInteger>(self, "_numberOfPortraitRows");
-    if (locationRows == 3) {
+    if (locationRows == 3 || statusBarStyle == 3) {
         return x;
     }
     return UIEdgeInsetsMake(x.top+10, x.left, x.bottom, x.right);
 }
 %end
+%end
 
-%hook UIScrollView
-- (UIEdgeInsets)adjustedContentInset {
-	UIEdgeInsets orig = %orig;
-
-    if (orig.top == 64) orig.top = 88; 
-    else if (orig.top == 32) orig.top = 0;
-    else if (orig.top == 128) orig.top = 152;
-
-    return orig;
+%group StatusBarXSpacing
+%hook _UIStatusBarVisualProvider_Split58
++(CGSize)notchSize {
+    CGSize const orig = %orig;
+    return CGSizeMake(orig.width, 18);
+}
++(double)height {
+    return 20;
 }
 %end
 %end
@@ -110,8 +99,8 @@ BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
 %group StatusBariPad
 %hook _UIStatusBarVisualProvider_iOS
 + (Class)class {
-    if (wantsRoundedCorners && screenRoundness > 15) return NSClassFromString(@"_UIStatusBarVisualProvider_RoundedPad_ForcedCellular");
-    return NSClassFromString(@"_UIStatusBarVisualProvider_Pad_ForcedCellular");
+    if (wantsRoundedCorners && screenRoundness > 15) return %c(_UIStatusBarVisualProvider_RoundedPad_ForcedCellular);
+    return %c(_UIStatusBarVisualProvider_Pad_ForcedCellular);
 }
 %end
 
@@ -146,32 +135,6 @@ BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
 %end
 %end
 
-%group KeyboardDock
-%hook UIKeyboardImpl
-+(UIEdgeInsets)deviceSpecificPaddingForInterfaceOrientation:(NSInteger)orientation inputMode:(id)mode {
-    UIEdgeInsets orig = %orig;
-    if (!NSClassFromString(@"BarmojiCollectionView")) 
-         orig.bottom = 46;
-	if (orig.left == 75)  {
-        orig.left = 0;
-        orig.right = 0;
-    }
-    return orig;
-}
-%end
-
-%hook UIKeyboardDockView
-- (CGRect)bounds {
-    CGRect const bounds = %orig;
-    if (NSClassFromString(@"BarmojiCollectionView")) 
-        return bounds;
-
-    return CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height + 15);
-}
-%end
-%end
-
-
 %group roundedDock
 %hook UITraitCollection
 - (CGFloat)displayCornerRadius {
@@ -180,8 +143,6 @@ BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
 %end
 %end
 
-
-%group reduceRows
 %hook SBIconListView
 -(unsigned long long)iconRowsForCurrentOrientation{
     int const orig = %orig;
@@ -189,8 +150,6 @@ BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
 	return orig - wantsReduceRows + wantsiPadDock;
 }
 %end
-%end
-
 
 %group ccGrabber
 
@@ -207,7 +166,7 @@ BOOL wantsDeviceSpoofing, wantsCompatabilityMode, wantsiPadMultitasking;
         self.controlCenterGrabberEffectContainerView.frame = CGRectMake(self.frame.size.width - 73,36,46,2.5);
         self.controlCenterGrabberView.frame = CGRectMake(0,0,46,2.5);
         self.controlCenterGlyphView.frame = CGRectMake(315,45,16.6,19.3);
-    } else if (statusBarStyle == 1) {
+    } else {
         self.controlCenterGrabberEffectContainerView.frame = CGRectMake(self.frame.size.width - 75.5,24,60.5,2.5);
         self.controlCenterGrabberView.frame = CGRectMake(0,0,60.5,2.5);
         self.controlCenterGlyphView.frame = CGRectMake(320,35,16.6,19.3);
@@ -302,14 +261,6 @@ int applicationDidFinishLaunching = 2;
 %end
 %end 
 
-extern "C" Boolean MGGetBoolAnswer(CFStringRef);
-%hookf(Boolean, MGGetBoolAnswer, CFStringRef key) {
-#define keyy(key_) CFEqual(key, CFSTR(key_))
-    if (keyy("nVh/gwNpy7Jv1NOk00CMrw"))
-        return wantsPIP;
-    return %orig;
-}
-
 %group ProudLock
 %hook SBUIPasscodeBiometricResource
 -(BOOL)hasPearlSupport {
@@ -379,10 +330,10 @@ CGFloat offset = 0;
 %end
 
 %hook BSUICAPackageView
-- (id)initWithPackageName:(id)arg1 inBundle:(id)arg2 {
-	if (![arg1 hasPrefix:@"lock"]) return %orig;
+- (id)initWithPackageName:(id)packageName inBundle:(id)arg2 {
+	if (![packageName hasPrefix:@"lock"]) return %orig;
 	
-	NSString* packageName = [arg1 stringByAppendingString:@"-896h"];
+	packageName = [packageName stringByAppendingString:@"-896h"];
 
 	return %orig(packageName, [NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/SpringBoardUIServices.framework"]);
 }
@@ -407,57 +358,14 @@ CGFloat offset = 0;
 	return r;
 }
 %end
-%end
 
-%group iPhone11Cam
-%hook CAMCaptureCapabilities 
--(BOOL)isCTMSupported {
-    return YES;
-}
-%end
+@interface WGWidgetGroupViewController : UIViewController
+@end
 
-%hook CAMViewfinderViewController 
--(BOOL)_wantsHDRControlsVisible{
-    return NO;
-}
-%end
-
-%hook CAMViewfinderViewController 
--(BOOL)_shouldUseZoomControlInsteadOfSlider {
-    return YES;
-}
-%end
-%end
-
-// Adds a bottom inset to the camera app.
-%group CameraFix
-%hook CAMBottomBar 
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, frame.origin.y -40));
-}
-%end
-
-%hook CAMZoomControl
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, frame.origin.y -30));
-}
-%end
-%end
-
-%group disableGesturesWhenKeyboard // iOS 13.3 and below
-%hook SBFluidSwitcherGestureManager
--(void)grabberTongueBeganPulling:(id)arg1 withDistance:(double)arg2 andVelocity:(double)arg3  {
-    if (!disableGestures)
-        %orig;
-}
-%end
-%end
-
-%group newDisableGesturesWhenKeyboard // iOS 13.4 and up
-%hook SBFluidSwitcherGestureManager
-- (void)grabberTongueBeganPulling:(id)arg1 withDistance:(double)arg2 andVelocity:(double)arg3 andGesture:(id)arg4  {
-    if (!disableGestures)
-        %orig;
+%hook WGWidgetGroupViewController
+- (void)updateViewConstraints {
+    %orig;
+	[self.view setFrame:CGRectSetY(self.view.frame, self.view.frame.origin.y + (offset/2))];
 }
 %end
 %end
@@ -468,12 +376,13 @@ CGFloat offset = 0;
 	return YES;
 }
 %end
-%end 
+%end
 
 %group iPadMultitasking
+
 %hook SBApplication
 - (BOOL)isMedusaCapable {
-	return YES;
+    return YES;
 }
 %end
 
@@ -490,110 +399,10 @@ CGFloat offset = 0;
 %end
 %end 
 
-%group BoundsHack
-%hookf(int, sysctl, const int *name, u_int namelen, void *oldp, size_t *oldlenp, const void *newp, size_t newlen) {
-	if (namelen == 2 && name[0] == CTL_HW && name[1] == HW_MACHINE && oldp != NULL) {
-        int const ret = %orig;
-        const char *mechine1 = "iPhone12,1";
-        strncpy((char*)oldp, mechine1, strlen(mechine1));
-        return ret;
-    } else {
-        return %orig;
-    }
-}
-%hookf(int, uname, struct utsname *value) {
-	int const ret = %orig;
-	NSString *utsmachine = @"iPhone12,1";
-	if (utsmachine) {	 
-		const char *utsnameCh = utsmachine.UTF8String; 
-		strcpy(value->machine, utsnameCh);
-	}
-    return ret;
-}
-%end
-
-%group CompatabilityMode
-%hook UIScreen
-- (CGRect)bounds {
-	CGRect bounds = %orig;
-    bounds.size.height > bounds.size.width ? bounds.size.height = 812 : bounds.size.width = 812;
-	return bounds;
-}
-%end
-%end 
-
-%hook UIWindow
-- (UIEdgeInsets)safeAreaInsets {
-	UIEdgeInsets orig = %orig;
-    orig.bottom = wantsbottomInset ? 20 : 0;
-	return orig;
-}
-%end
-
-%group bottominsetfix // AWE = TikTok, TFN = Twitter, YT = Youtube
-%hook AWETabBar
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, frame.origin.y + 40));
-}
-%end
-
-%hook AWEFeedTableView
-- (void)setFrame:(CGRect)frame {
-	%orig(CGRectMake(frame.origin.x,frame.origin.y,frame.size.width,frame.size.height + 40));
-}
-%end
-
-%hook TFNNavigationBarOverlayView  
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectMake(frame.origin.x,frame.origin.y,frame.size.width,frame.size.height + 6));
-}
-%end
-
-%hook YTPivotBarView
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectSetY(frame, frame.origin.y - 40));
-}
-%end
-%hook YTAppView
-- (void)setFrame:(CGRect)frame {
-    %orig(CGRectMake(frame.origin.x,frame.origin.y,frame.size.width,frame.size.height + 40));
-}
-%end
-
-%hook YTNGWatchLayerView
--(CGRect)miniBarFrame{
-    CGRect const frame = %orig;
-	return CGRectSetY(frame, frame.origin.y - 40);
-}
-%end
-%end 
-
-%group InstagramFix
-
-@interface IGNavigationBar : UINavigationBar
-@end
-
-%hook IGNavigationBar
-
-- (void)layoutSubviews {    
-    %orig;
-
-    self.frame = CGRectSetY(self.frame, 20);
-
-    /*CGRect _frame = self.frame;
-    _frame.origin.y = 20;
-    //_frame.size.height = 68; Fixes Instagram bug, but makes layout weird
-    self.frame = _frame;*/
-}
- 
-%end
-%end
-
 // Preferences.
 void loadPrefs() {
      @autoreleasepool {
 
-        NSString const *mainIdentifier = [NSBundle mainBundle].bundleIdentifier;
         NSDictionary const *prefs = [[NSDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
 
         if (prefs) {
@@ -601,53 +410,36 @@ void loadPrefs() {
             statusBarStyle = [[prefs objectForKey:@"statusBarStyle"] integerValue];
             screenRoundness = [[prefs objectForKey:@"screenRoundness"] integerValue];
             appswitcherRoundness = [[prefs objectForKey:@"appswitcherRoundness"] integerValue];
-            wantsbottomInset = [[prefs objectForKey:@"bottomInset"] boolValue];
             wantsHomeBarSB = [[prefs objectForKey:@"homeBarSB"] boolValue];
             wantsHomeBarLS = [[prefs objectForKey:@"homeBarLS"] boolValue];
-            wantsKeyboardDock =  [[prefs objectForKey:@"keyboardDock"] boolValue];
             wantsRoundedAppSwitcher =[[prefs objectForKey:@"roundedAppSwitcher"] boolValue];
             wantsReduceRows =  [[prefs objectForKey:@"reduceRows"] boolValue];
             wantsCCGrabber = [[prefs objectForKey:@"ccGrabber"] boolValue];
             wantsBatteryPercent = [[prefs objectForKey:@"batteryPercent"] boolValue];
-            wantsGesturesDisabledWhenKeyboard = [[prefs objectForKey:@"noGesturesForKeyboard"] boolValue];
             wantsiPadDock = [[prefs objectForKey:@"iPadDock"] boolValue];
             wantsiPadMultitasking = wantsiPadDock ? [[prefs objectForKey:@"iPadMultitasking"] boolValue] : NO;
             wantsXButtons =  [[prefs objectForKey:@"xButtons"] boolValue];
             wantsRoundedCorners = [[prefs objectForKey:@"roundedCorners"] boolValue];
-            wantsPIP = [[prefs objectForKey:@"PIP"] boolValue];
             wantsProudLock = [[prefs objectForKey:@"ProudLock"] boolValue];
             wantsHideSBCC = [[prefs objectForKey:@"HideSBCC"] boolValue];
             wantsLSShortcuts = [[prefs objectForKey:@"lsShortcutsEnabled"] boolValue];
-            wants11Camera = [[prefs objectForKey:@"11Camera"] boolValue];
-            wantsDeviceSpoofing = [[prefs objectForKey:@"deviceSpoofing"] boolValue];
-            wantsCompatabilityMode = [[prefs objectForKey:@"compatabilityMode"] boolValue];
-
-            NSDictionary const *appSettings = [prefs objectForKey:mainIdentifier];
-    
-            if (appSettings) {
-                wantsKeyboardDock = [appSettings objectForKey:@"keyboardDock"] ? [[appSettings objectForKey:@"keyboardDock"] boolValue] : wantsKeyboardDock;
-                wantsbottomInset = [appSettings objectForKey:@"bottomInset"] ? [[appSettings objectForKey:@"bottomInset"] boolValue] : wantsbottomInset;
-                wantsDeviceSpoofing = [appSettings objectForKey:@"deviceSpoofing"] ? [[appSettings objectForKey:@"deviceSpoofing"] boolValue] : wantsDeviceSpoofing;
-                wantsCompatabilityMode = [appSettings objectForKey:@"compatabilityMode"] ? [[appSettings objectForKey:@"compatabilityMode"] boolValue] : wantsCompatabilityMode;
-            }
         }
         else {
-            NSString *path = @"/User/Library/Preferences/com.ryannair05.little11prefs.plist";
-            NSString *pathDefault = @"/Library/PreferenceBundles/little11prefs.bundle/defaults.plist";
+            NSString *path = @"/System/Library/PrivateFrameworks/CameraUI.framework/CameraUI-d4x-n104.strings";
+            NSString *pathDefault = @"/Library/PreferenceBundles/little11prefs.bundle/CameraUI-d4x-n104.strings";
             NSFileManager const *fileManager = [NSFileManager defaultManager];
 
             if (![fileManager fileExistsAtPath:path]) {
                 [fileManager copyItemAtPath:pathDefault toPath:path error:nil];
             }
 
-            path = @"/System/Library/PrivateFrameworks/CameraUI.framework/CameraUI-d4x-n104.strings";
-            pathDefault = @"/Library/PreferenceBundles/little11prefs.bundle/CameraUI-d4x-n104.strings";
+            path = @"/User/Library/Preferences/com.ryannair05.little11prefs.plist";
+            pathDefault = @"/Library/PreferenceBundles/little11prefs.bundle/defaults.plist";
 
             if (![fileManager fileExistsAtPath:path]) {
                 [fileManager copyItemAtPath:pathDefault toPath:path error:nil];
+                loadPrefs();
             }
-
-            loadPrefs();
         }
     }
 }
@@ -660,78 +452,29 @@ void loadPrefs() {
 
         if (enabled) {
 
-            bool const isSpringBoard = [@"SpringBoard" isEqualToString:[NSProcessInfo processInfo].processName];
+            if (statusBarStyle == 1) %init(StatusBariPad);
+            else if (statusBarStyle > 1) {
+                %init(StatusBarX);
+                if (statusBarStyle == 3)
+                    %init(StatusBarXSpacing);
+            } 
+            else wantsHideSBCC = YES;
 
-            if (isSpringBoard) {
-
-                if (statusBarStyle == 1) %init(StatusBariPad)      
-                else if (statusBarStyle == 2) %init(StatusBarX);
-                else wantsHideSBCC = YES;
-
-                if (!wantsHomeBarLS) {
-                    %init(hideHomeBarLS);
-                    if (!wantsHomeBarSB) %init(completelyRemoveHomeBar);
-                }
-
-                if (wantsCCGrabber) %init(ccGrabber);
-                if (wantsBatteryPercent) %init(batteryPercent);
-                if (!wantsXButtons) %init(originalButtons);
-                if (wantsHideSBCC) %init(HideSBCC);
-                if (wantsRoundedAppSwitcher) %init(roundedDock);
-                if (wantsRoundedCorners) %init(roundedCorners);
-                if (wantsiPadDock) %init(iPadDock);
-                if (wantsiPadMultitasking) %init(iPadMultitasking)
-                if (wantsProudLock) %init(ProudLock);
-                %init(reduceRows);
-
-            } else {
-
-                NSString* const bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-
-                if ([bundleIdentifier containsString:@"com.apple"]) {
-                    if (wants11Camera && [bundleIdentifier isEqualToString:@"com.apple.camera"])
-                    %init(iPhone11Cam);
-                }
-                
-                else {
-
-                    if ([bundleIdentifier isEqualToString:@"com.google.ios.youtube"])
-                        wantsCompatabilityMode = YES;
-                    else if ([bundleIdentifier isEqualToString:@"com.facebook.Facebook"]) 
-                        wantsbottomInset = YES;
-                    else if ([bundleIdentifier isEqualToString:@"com.zhiliaoapp.musically"])
-                        wantsDeviceSpoofing = YES;
-
-                    if (wantsbottomInset || statusBarStyle == 2) {
-
-                        %init(InstagramFix);
-
-                        if (wantsCompatabilityMode) %init(CompatabilityMode);
-                        if (wantsDeviceSpoofing) %init(BoundsHack);
-                        if (wantsbottomInset) %init(CameraFix); 
-                        else %init(bottominsetfix);
-                    } 
-                }
+            if (!wantsHomeBarLS) {
+                %init(hideHomeBarLS);
+                if (!wantsHomeBarSB) %init(completelyRemoveHomeBar);
             }
 
-            if (![[NSFileManager defaultManager] fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/KeyboardPlus.dylib"]) {
+            if (wantsCCGrabber) %init(ccGrabber);
+            if (wantsBatteryPercent) %init(batteryPercent);
+            if (!wantsXButtons) %init(originalButtons);
+            if (wantsHideSBCC) %init(HideSBCC);
+            if (wantsRoundedAppSwitcher) %init(roundedDock);
+            if (wantsRoundedCorners) %init(roundedCorners);
+            if (wantsiPadDock) %init(iPadDock);
+            if (wantsiPadMultitasking) %init(iPadMultitasking)
+            if (wantsProudLock) %init(ProudLock);
 
-                if (wantsKeyboardDock) %init(KeyboardDock);
-                else %init(ForceDefaultKeyboard);
-
-                if (wantsGesturesDisabledWhenKeyboard) {
-                    [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardDidShowNotification object:nil queue:nil usingBlock:^(NSNotification *n){
-                            disableGestures = true;
-                        }];
-                    [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardWillHideNotification object:nil queue:nil usingBlock:^(NSNotification *n){
-                            disableGestures = false;
-                        }];
-                    if (@available(iOS 13.4, *)) 
-                        %init(newDisableGesturesWhenKeyboard);
-                    else
-                        %init(disableGesturesWhenKeyboard);
-                }
-            }
             %init;
         }
     }

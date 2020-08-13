@@ -12,6 +12,7 @@
 @property (nonatomic, retain) UILabel *titleLabel;
 @property (nonatomic, retain) UIImageView *iconView;
 @property (nonatomic, retain) NSMutableDictionary *savedSpecifiers;
+@property (nonatomic, retain) UIView *headerView;
 -(OrderedDictionary*)trimDataSource:(OrderedDictionary*)dataSource;
 -(NSMutableArray*)appSpecifiers;
 - (void)respring:(id)sender;
@@ -20,7 +21,7 @@
 @interface OBButtonTray : UIView
 @property (nonatomic,retain) UIVisualEffectView * effectView;
 - (void)addButton:(id)arg1;
-- (void)addCaptionText:(id)arg1;;
+- (void)addCaptionText:(id)arg1;
 @end
 
 @interface OBBoldTrayButton : UIButton

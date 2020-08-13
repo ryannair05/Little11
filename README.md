@@ -9,16 +9,16 @@ iPhone 6S - iPhone X running iOS 13 or later
 ## Features - All can be enabled/disabled in settings* :)
 * iPhone X fluid gestures.
 * iPhone X and iPad status bar.
-* iPhone X CC Grabber.
-* iPhone X keyboard.
-* Optional Homebar
-* FaceID Animations
+* iPhone X CC Grabber, Keyboard, and Homebar
+* iPhone X Device Spoofing
+* iPad Dock and Multitasking Features
+* FaceID Padlock
 * Picture In Picture
-* iPhone X rounded dock, switcher and corners
+* iPhone X rounded dock, switcher and rounded corners
 * Battery Percentage in Battery Icon
 * Bottom Inset
 * iPhone X Coversheet Shortcuts 
-* Rounded Corners
+* iPhone 11 Camera UI [Beta]
 * Reduce Rows
 * Lightweight with no battery drain.*
 
@@ -35,13 +35,11 @@ Little11 is a fork of [LittleXS by me and binksxela](https://github.com/binksxel
 
 Developers are free to modify and use the LittleXS source in their work in accordance with the GNU General Public License.
 
-Note the entire source code of Little11 is not here; there are some parts that I would prefer to keep closed source for the time being. 
-
 ## Credits
 * VitaTaf | [HomeGesture](https://github.com/VitaTaf/HomeGesture)
 * Andrew Wiik | [LittleX](https://github.com/andrewwiik/LittleX)
 * duraidabdul | [Neptune](https://github.com/duraidabdul/Neptune)
-* SniperGER |  [NotchSimulator](https://github.com/SniperGER/NotchSimulator) 
+* SniperGER |  [ProudLock2](https://github.com/SniperGER/ProudLock2) 
  
 
-*All tweaks drains battery life, which is something that can not be avoided; however, Little11 drains less battery than similar tweaks.
+*All tweaks drain battery life, which is something that can not be avoided; however, Little11 drains less battery compared to similar tweaks.

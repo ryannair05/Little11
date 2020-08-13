@@ -21,7 +21,7 @@
 //     distribution.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
 @interface OrderedDictionary : NSMutableDictionary
 {

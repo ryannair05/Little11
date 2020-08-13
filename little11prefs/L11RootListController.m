@@ -35,10 +35,17 @@ OBWelcomeController *welcomeController;
     
         self.iconView = [[UIImageView alloc] initWithFrame:CGRectMake(0,0,10,10)];
         self.iconView.contentMode = UIViewContentModeScaleAspectFit;
-        self.iconView.image = [UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/little11prefs.bundle/icon@2x.png"];
+        self.iconView.image = [UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/little11prefs.bundle/icon@3x.png"];
         self.iconView.translatesAutoresizingMaskIntoConstraints = NO;
         self.iconView.alpha = 0.0;
         [self.navigationItem.titleView addSubview:self.iconView];
+
+        self.headerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,200,200)];
+        UIImageView *headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0,0,200,200)];
+        headerImageView.contentMode = UIViewContentModeScaleAspectFill;
+        headerImageView.image = [UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/little11prefs.bundle/Banner.png"];
+        headerImageView.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.headerView addSubview:headerImageView];
     
         [NSLayoutConstraint activateConstraints:@[
             [self.titleLabel.topAnchor constraintEqualToAnchor:self.navigationItem.titleView.topAnchor],
@@ -49,6 +56,10 @@ OBWelcomeController *welcomeController;
             [self.iconView.leadingAnchor constraintEqualToAnchor:self.navigationItem.titleView.leadingAnchor],
             [self.iconView.trailingAnchor constraintEqualToAnchor:self.navigationItem.titleView.trailingAnchor],
             [self.iconView.bottomAnchor constraintEqualToAnchor:self.navigationItem.titleView.bottomAnchor],
+            [headerImageView.topAnchor constraintEqualToAnchor:self.headerView.topAnchor],
+            [headerImageView.leadingAnchor constraintEqualToAnchor:self.headerView.leadingAnchor],
+            [headerImageView.trailingAnchor constraintEqualToAnchor:self.headerView.trailingAnchor],
+            [headerImageView.bottomAnchor constraintEqualToAnchor:self.headerView.bottomAnchor],
         ]];
     }
 
@@ -164,7 +175,7 @@ OBWelcomeController *welcomeController;
     if (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 0) {
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:YES];
     }
-    else if  (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 2) {
+    else if  (([[prefs objectForKey:@"statusBarStyle"] integerValue]) > 1) {
         hasStatusBarOrInset = YES;
     }
     if (([[prefs objectForKey:@"bottomInset"] boolValue]) == 1) {
@@ -190,6 +201,11 @@ OBWelcomeController *welcomeController;
     }
 }
 
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    tableView.tableHeaderView = self.headerView;
+    return [super tableView:tableView cellForRowAtIndexPath:indexPath];
+}
+
 -(void)reloadSpecifiers {
     [super reloadSpecifiers];
 
@@ -208,7 +224,7 @@ OBWelcomeController *welcomeController;
     if (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 0) {
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:NO];
     }
-    else if  (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 2) {
+    else if  (([[prefs objectForKey:@"statusBarStyle"] integerValue]) > 1) {
         hasStatusBarOrInset = YES;
     }
     if (([[prefs objectForKey:@"bottomInset"] boolValue]) == 1) {
@@ -323,17 +339,12 @@ OBWelcomeController *welcomeController;
     
   NSDictionary *prefs = [[NSDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.ryannair05.little11prefs.plist"];
 
- BOOL hasStatusBarOrInset = NO;
-    
   if (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 0) {
         [self removeContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] animated:YES];
   }
   else {
-        if  (([[prefs objectForKey:@"statusBarStyle"] integerValue]) == 2)
-           hasStatusBarOrInset = YES;
-        
-        if (![self containsSpecifier:self.savedSpecifiers[@"HideSBCC"]])
-            [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] afterSpecifierID:@"batteryPercent" animated:YES];
+    if (![self containsSpecifier:self.savedSpecifiers[@"HideSBCC"]])
+        [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"HideSBCC"]] afterSpecifierID:@"batteryPercent" animated:YES];
   }
 
   if ([key isEqualToString:@"iPadDock"]) {
@@ -381,14 +392,8 @@ OBWelcomeController *welcomeController;
         }
 
     }
-
-    else if ([key isEqualToString:@"bottomInset"]) {
-      if ([value boolValue] == true) {
-           hasStatusBarOrInset = YES;
-      }
-    }
     
-    if (hasStatusBarOrInset) {
+    if (([[prefs objectForKey:@"statusBarStyle"] integerValue] > 1) || [[prefs objectForKey:@"bottomInset"] boolValue]) {
         if (![self containsSpecifier:self.savedSpecifiers[@"compatabilityMode"]]) {
             if ([self containsSpecifier:self.savedSpecifiers[@"screenRoundness"]])
                 [self insertContiguousSpecifiers:@[self.savedSpecifiers[@"compatabilityMode"]] afterSpecifierID:@"screenRoundness" animated:YES];
