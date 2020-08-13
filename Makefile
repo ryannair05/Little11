@@ -17,6 +17,6 @@ ARCHS = arm64 arm64e
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
-	install.exec "killall -9 Facebook"
+	install.exec "sbreload"
 SUBPROJECTS += little11prefs
 include $(THEOS_MAKE_PATH)/aggregate.mk

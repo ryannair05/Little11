@@ -190,6 +190,12 @@ extern "C" Boolean MGGetBoolAnswer(CFStringRef);
 }
 %end
 
+%hook T1SuggestsModuleHeaderView
+- (void)setFrame:(CGRect)frame {
+   %orig(CGRectSetY(frame, frame.origin.y - 22));
+}
+%end
+
 %hook YTPivotBarView
 - (void)setFrame:(CGRect)frame {
     %orig(CGRectSetY(frame, frame.origin.y - 40));
